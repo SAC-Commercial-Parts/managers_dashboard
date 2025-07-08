@@ -41,7 +41,7 @@ class QuoteDetailView extends StatelessWidget {
             _buildTotal(),
 
             // Notes
-            if (quote.notes != null) ...[
+            if (quote.notes != null && quote.notes!.isNotEmpty) ...[ // Check if notes is not null and not empty
               const SizedBox(height: 24),
               _buildNotes(),
             ],
@@ -57,7 +57,7 @@ class QuoteDetailView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getStatusColor(quote.status).withOpacity(0.15),
+            color: _getStatusColor(quote.status).withAlpha(60),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -83,7 +83,7 @@ class QuoteDetailView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(quote.status).withOpacity(0.15),
+                  color: _getStatusColor(quote.status).withAlpha(60),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -123,8 +123,10 @@ class QuoteDetailView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _buildInfoRow(Icons.business, 'Company', quote.clientName),
-          _buildInfoRow(Icons.email, 'Email', quote.clientEmail),
-          _buildInfoRow(Icons.phone, 'Phone', quote.clientPhone),
+          if (quote.clientEmail != null && quote.clientEmail!.isNotEmpty) // Conditionally show
+            _buildInfoRow(Icons.email, 'Email', quote.clientEmail!),
+          if (quote.clientPhone != null && quote.clientPhone!.isNotEmpty) // Conditionally show
+            _buildInfoRow(Icons.phone, 'Phone', quote.clientPhone!),
         ],
       ),
     );
@@ -152,8 +154,10 @@ class QuoteDetailView extends StatelessWidget {
           const SizedBox(height: 12),
           _buildInfoRow(Icons.calendar_today, 'Created',
               DateFormat('MMM dd, yyyy').format(quote.dateCreated)),
-          _buildInfoRow(Icons.person, 'Sales Rep', quote.employeeName),
-          _buildInfoRow(Icons.location_on, 'Branch', quote.branchCode),
+          if (quote.employeeName != null && quote.employeeName!.isNotEmpty) // Conditionally show
+            _buildInfoRow(Icons.person, 'Sales Rep', quote.employeeName!),
+          if (quote.branchCode != null && quote.branchCode!.isNotEmpty) // Conditionally show
+            _buildInfoRow(Icons.location_on, 'Branch', quote.branchCode!),
           if (quote.dateConverted != null)
             _buildInfoRow(Icons.check_circle, 'Converted',
                 DateFormat('MMM dd, yyyy').format(quote.dateConverted!)),
@@ -194,7 +198,7 @@ class QuoteDetailView extends StatelessWidget {
                     Expanded(flex: 3, child: Text('Description', style: TextStyle(fontWeight: FontWeight.w600))),
                     Expanded(flex: 1, child: Text('Qty', style: TextStyle(fontWeight: FontWeight.w600), textAlign: TextAlign.center)),
                     Expanded(flex: 2, child: Text('Unit Price', style: TextStyle(fontWeight: FontWeight.w600), textAlign: TextAlign.right)),
-                    Expanded(flex: 2, child: Text('Total', style: TextStyle(fontWeight: FontWeight.w600), textAlign: TextAlign.right)),
+                    // Removed 'Total' column as it's not in the QuoteItem model now
                   ],
                 ),
               ),
@@ -214,7 +218,7 @@ class QuoteDetailView extends StatelessWidget {
                       Expanded(flex: 3, child: Text(item.description)),
                       Expanded(flex: 1, child: Text('${item.quantity}', textAlign: TextAlign.center)),
                       Expanded(flex: 2, child: Text('\$${item.unitPrice.toStringAsFixed(2)}', textAlign: TextAlign.right)),
-                      Expanded(flex: 2, child: Text('\$${item.total.toStringAsFixed(2)}', textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w600))),
+                      // Removed 'Total' cell
                     ],
                   ),
                 );
@@ -230,9 +234,9 @@ class QuoteDetailView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.primaryRed.withOpacity(0.05),
+        color: AppTheme.primaryRed.withAlpha(32),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primaryRed.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primaryRed.withAlpha(64)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -279,7 +283,7 @@ class QuoteDetailView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            quote.notes!,
+            quote.notes!, // Already checked for null in build method
             style: const TextStyle(
               fontSize: 14,
               color: AppTheme.darkGray,

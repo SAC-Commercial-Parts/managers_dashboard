@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../core/app_theme.dart';
-// import '../models/performance_data.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
-// import '../widgets/metric_card.dart';
 import '../widgets/filter_dropdown.dart';
 
 class DashboardView extends StatelessWidget {
@@ -135,7 +133,7 @@ class DashboardView extends StatelessWidget {
             ),
             _buildEnhancedMetricCard(
               title: 'Total Quotes',
-              value: summary['quotes']?.toInt().toString() ?? '0',
+              value: summary['totalQuotes']?.toInt().toString() ?? '0', // Changed from 'quotes' to 'totalQuotes'
               icon: Icons.description,
               color: AppTheme.darkRed,
               subtitle: 'Generated quotes',
@@ -179,7 +177,7 @@ class DashboardView extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               Colors.white,
-              color.withOpacity(0.05),
+              color.withAlpha(32),
             ],
           ),
         ),
@@ -193,7 +191,7 @@ class DashboardView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withAlpha(48),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -204,7 +202,7 @@ class DashboardView extends StatelessWidget {
                   ),
                   const Spacer(),
                   const Icon(
-                    Icons.arrow_upward,
+                    Icons.arrow_upward, // This icon is static, not tied to data
                     color: Colors.green,
                     size: 16,
                   ),
@@ -266,7 +264,7 @@ class DashboardView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryRed.withOpacity(0.1),
+                    color: AppTheme.primaryRed.withAlpha(56),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
@@ -301,7 +299,7 @@ class DashboardView extends StatelessWidget {
                       x: 1,
                       barRods: [
                         BarChartRodData(
-                          toY: summary['quotes'] ?? 0,
+                          toY: summary['totalQuotes'] ?? 0, // Changed from 'quotes' to 'totalQuotes'
                           color: AppTheme.darkRed,
                           width: 40,
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
@@ -380,7 +378,7 @@ class DashboardView extends StatelessWidget {
                     horizontalInterval: 10,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.withOpacity(0.2),
+                        color: Colors.grey.withAlpha(64),
                         strokeWidth: 1,
                       );
                     },
@@ -397,8 +395,8 @@ class DashboardView extends StatelessWidget {
 
   Widget _buildAdditionalStats(Map<String, double> summary)
   {
-    final conversionRate = summary['quotes'] != null && summary['quotes']! > 0
-        ? ((summary['conversions'] ?? 0) / summary['quotes']! * 100)
+    final conversionRate = summary['totalQuotes'] != null && summary['totalQuotes']! > 0 // Changed from 'quotes' to 'totalQuotes'
+        ? ((summary['conversions'] ?? 0) / summary['totalQuotes']! * 100)
         : 0.0;
 
     return Row(

@@ -1,0 +1,143 @@
+{
+  "project_info": {
+    "project_number": "912272776985",
+    "firebase_url": "https://repmobileapp-1a74a-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "repmobileapp-1a74a",
+    "storage_bucket": "repmobileapp-1a74a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912272776985:android:de0ea259b0c88ace6b2f88",
+        "android_client_info": {
+          "package_name": "com.appadmin.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATyiQwm4qcOpAV3WkYyvEEu_uoAQcfB9I"
+        },
+        {
+          "current_key": "AIzaSyD1VKO7Hades2axUrqmk7AZyW03nsgLcZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912272776985:android:4130cdac9f84744b6b2f88",
+        "android_client_info": {
+          "package_name": "com.example.managers_dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATyiQwm4qcOpAV3WkYyvEEu_uoAQcfB9I"
+        },
+        {
+          "current_key": "AIzaSyD1VKO7Hades2axUrqmk7AZyW03nsgLcZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912272776985:android:a0834f44b9e464546b2f88",
+        "android_client_info": {
+          "package_name": "com.example.rep_app_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATyiQwm4qcOpAV3WkYyvEEu_uoAQcfB9I"
+        },
+        {
+          "current_key": "AIzaSyD1VKO7Hades2axUrqmk7AZyW03nsgLcZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912272776985:android:6add1973cd3f53216b2f88",
+        "android_client_info": {
+          "package_name": "com.example.sac_managers_dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATyiQwm4qcOpAV3WkYyvEEu_uoAQcfB9I"
+        },
+        {
+          "current_key": "AIzaSyD1VKO7Hades2axUrqmk7AZyW03nsgLcZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912272776985:android:d16ac4e400cde1686b2f88",
+        "android_client_info": {
+          "package_name": "com.example.testing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATyiQwm4qcOpAV3WkYyvEEu_uoAQcfB9I"
+        },
+        {
+          "current_key": "AIzaSyD1VKO7Hades2axUrqmk7AZyW03nsgLcZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:912272776985:android:6fe66923c2dcc0a36b2f88",
+        "android_client_info": {
+          "package_name": "sac.apps.rep_app_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATyiQwm4qcOpAV3WkYyvEEu_uoAQcfB9I"
+        },
+        {
+          "current_key": "AIzaSyD1VKO7Hades2axUrqmk7AZyW03nsgLcZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

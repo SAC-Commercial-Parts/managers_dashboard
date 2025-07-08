@@ -1,12 +1,13 @@
-// lib/viewmodels/quotes_invoices_viewmodel.dart
-
 import 'package:flutter/material.dart';
 import '../models/quote.dart';
 import '../models/invoice.dart';
-import '../services/quotes_invoice_service.dart';
+
 import '../services/auth_service.dart';
+import '../services/quotes_invoice_service.dart';
 
 class QuotesInvoicesViewModel extends ChangeNotifier {
+  final QuotesInvoicesService _quotesInvoicesService = QuotesInvoicesService(); // Instantiate the new service
+
   List<Quote> _quotes = [];
   List<Invoice> _invoices = [];
   Quote? _selectedQuote;
@@ -25,14 +26,14 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   int get selectedTabIndex => _selectedTabIndex;
 
-  String get currentBranch => AuthService.currentUser?.branchCode ?? '';
+  String get currentBranch => AuthService.currentAppUser?.branchCode ?? '';
 
   // Filtered lists
   List<Quote> get unconvertedQuotes => _quotes.where((q) => q.status == QuoteStatus.pending).toList();
   List<Quote> get convertedQuotes => _quotes.where((q) => q.status == QuoteStatus.converted).toList();
-  List<Invoice> get unpaidInvoices => _invoices.where((i) => i.status != InvoiceStatus.paid).toList();
-  List<Invoice> get paidInvoices => _invoices.where((i) => i.status == InvoiceStatus.paid).toList();
-  List<Invoice> get creditedInvoices => _invoices.where((i) => i.isCredited).toList(); // <--- ADD THIS
+  List<Invoice> get unpaidInvoices => _invoices.where((i) => i.status != InvoiceStatus.paid && !i.isCredited).toList(); // Exclude credited
+  List<Invoice> get paidInvoices => _invoices.where((i) => i.status == InvoiceStatus.paid && !i.isCredited).toList(); // Exclude credited
+  List<Invoice> get creditedInvoices => _invoices.where((i) => i.isCredited).toList();
 
   QuotesInvoicesViewModel() {
     _loadData();
@@ -70,28 +71,39 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _loadData() {
-    if (AuthService.currentUser == null) return;
+  Future<void> _loadData() async { // Made async
+    if (AuthService.currentAppUser == null || AuthService.currentAppUser!.branchCode == null) {
+      _quotes = [];
+      _invoices = [];
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
 
     _isLoading = true;
     notifyListeners();
 
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _quotes = QuotesInvoicesService.getQuotesByDateRange(
-        AuthService.currentUser!.branchCode,
+    try {
+      final String branchCode = AuthService.currentAppUser!.branchCode!;
+      _quotes = await _quotesInvoicesService.getQuotesByDateRange(
+        branchCode,
         _startDate,
         _endDate,
       );
 
-      _invoices = QuotesInvoicesService.getInvoicesByDateRange(
-        AuthService.currentUser!.branchCode,
+      _invoices = await _quotesInvoicesService.getInvoicesByDateRange(
+        branchCode,
         _startDate,
         _endDate,
       );
-
+    } catch (e) {
+      print('Error loading quotes/invoices: $e');
+      _quotes = []; // Clear on error
+      _invoices = []; // Clear on error
+    } finally {
       _isLoading = false;
       notifyListeners();
-    });
+    }
   }
 
   void refresh() {
@@ -118,10 +130,10 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
 
   Map<String, dynamic> get invoicesStats {
     final total = _invoices.length;
-    final paid = _invoices.where((i) => i.status == InvoiceStatus.paid && !i.isCredited).length; // <--- Exclude credited
-    final overdue = _invoices.where((i) => i.status == InvoiceStatus.overdue && !i.isCredited).length; // <--- Exclude credited
-    final credited = _invoices.where((i) => i.isCredited).length; // <--- ADD THIS
-    final totalValue = _invoices.where((i) => !i.isCredited).fold(0.0, (sum, i) => sum + i.totalAmount); // <--- Exclude credited
+    final paid = _invoices.where((i) => i.status == InvoiceStatus.paid && !i.isCredited).length;
+    final overdue = _invoices.where((i) => i.status == InvoiceStatus.overdue && !i.isCredited).length;
+    final credited = _invoices.where((i) => i.isCredited).length;
+    final totalValue = _invoices.where((i) => !i.isCredited).fold(0.0, (sum, i) => sum + i.totalAmount);
     final paidValue = _invoices.where((i) => i.status == InvoiceStatus.paid && !i.isCredited)
         .fold(0.0, (sum, i) => sum + i.totalAmount);
 
@@ -129,14 +141,13 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
       'total': total,
       'paid': paid,
       'overdue': overdue,
-      'credited': credited, // <--- ADD THIS
+      'credited': credited,
       'totalValue': totalValue,
       'paidValue': paidValue,
       'paymentRate': total > 0 ? (paid / total * 100) : 0.0,
     };
   }
 
-  // New getter for Credit stats (if needed, otherwise invoicesStats can be adapted)
   Map<String, dynamic> get creditStats {
     final totalCredited = _invoices.where((i) => i.isCredited).length;
     final totalCreditedValue = _invoices.where((i) => i.isCredited).fold(0.0, (sum, i) => sum + i.totalAmount);

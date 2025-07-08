@@ -1,5 +1,3 @@
-// lib/views/quotes_invoices_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -126,14 +124,14 @@ class QuotesInvoicesView extends StatelessWidget {
                   viewModel.selectedTabIndex == 1,
                       () => viewModel.setTabIndex(1),
                 ),
-                const SizedBox(width: 12), // <--- ADD THIS
-                _buildTabButton( // <--- ADD THIS
-                  'Credits', // <--- ADD THIS
-                  Icons.assignment_return, // <--- ADD THIS
-                  2, // <--- ADD THIS
-                  viewModel.selectedTabIndex == 2, // <--- ADD THIS
-                      () => viewModel.setTabIndex(2), // <--- ADD THIS
-                ), // <--- ADD THIS
+                const SizedBox(width: 12),
+                _buildTabButton(
+                  'Credits',
+                  Icons.assignment_return,
+                  2,
+                  viewModel.selectedTabIndex == 2,
+                      () => viewModel.setTabIndex(2),
+                ),
               ],
             ),
           ],
@@ -303,7 +301,7 @@ class QuotesInvoicesView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withAlpha(60),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -355,7 +353,7 @@ class QuotesInvoicesView extends StatelessWidget {
                       ? Icons.description
                       : viewModel.selectedTabIndex == 1
                       ? Icons.receipt
-                      : Icons.assignment_return, // <--- ADD THIS
+                      : Icons.assignment_return,
                   color: AppTheme.primaryRed,
                   size: 20,
                 ),
@@ -365,7 +363,7 @@ class QuotesInvoicesView extends StatelessWidget {
                       ? 'Quotes'
                       : viewModel.selectedTabIndex == 1
                       ? 'Invoices'
-                      : 'Credits', // <--- ADD THIS
+                      : 'Credits',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -383,7 +381,7 @@ class QuotesInvoicesView extends StatelessWidget {
                 } else if (viewModel.selectedTabIndex == 1) {
                   return _buildInvoicesList(viewModel);
                 } else {
-                  return _buildCreditedInvoicesList(viewModel); // <--- ADD THIS
+                  return _buildCreditedInvoicesList(viewModel);
                 }
               },
             ),
@@ -423,7 +421,6 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  // <--- ADD THIS NEW WIDGET
   Widget _buildCreditedInvoicesList(QuotesInvoicesViewModel viewModel) {
     final creditedInvoices = viewModel.creditedInvoices;
     if (creditedInvoices.isEmpty) {
@@ -439,7 +436,6 @@ class QuotesInvoicesView extends StatelessWidget {
       },
     );
   }
-  // --->
 
   Widget _buildQuoteListItem(Quote quote, QuotesInvoicesViewModel viewModel) {
     final isSelected = viewModel.selectedQuote?.id == quote.id;
@@ -450,7 +446,7 @@ class QuotesInvoicesView extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _getQuoteStatusColor(quote.status).withOpacity(0.15),
+            color: _getQuoteStatusColor(quote.status).withAlpha(60),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -492,7 +488,7 @@ class QuotesInvoicesView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _getQuoteStatusColor(quote.status).withOpacity(0.15),
+                color: _getQuoteStatusColor(quote.status).withAlpha(60),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -507,7 +503,7 @@ class QuotesInvoicesView extends StatelessWidget {
           ],
         ),
         selected: isSelected,
-        selectedTileColor: AppTheme.primaryRed.withOpacity(0.1),
+        selectedTileColor: AppTheme.primaryRed.withAlpha(56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -530,7 +526,7 @@ class QuotesInvoicesView extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.15), // Use statusColor
+            color: statusColor.withAlpha(60), // Use statusColor
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -572,7 +568,7 @@ class QuotesInvoicesView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.15), // Use statusColor
+                color: statusColor.withAlpha(60), // Use statusColor
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -587,7 +583,7 @@ class QuotesInvoicesView extends StatelessWidget {
           ],
         ),
         selected: isSelected,
-        selectedTileColor: AppTheme.primaryRed.withOpacity(0.1),
+        selectedTileColor: AppTheme.primaryRed.withAlpha(56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -669,6 +665,8 @@ class QuotesInvoicesView extends StatelessWidget {
         return Colors.red;
       case InvoiceStatus.cancelled:
         return Colors.grey;
+      case InvoiceStatus.pending: // Handle pending status
+        return Colors.orange; // Example color for pending
     }
   }
 
@@ -684,6 +682,8 @@ class QuotesInvoicesView extends StatelessWidget {
         return 'Overdue';
       case InvoiceStatus.cancelled:
         return 'Cancelled';
+      case InvoiceStatus.pending: // Handle pending status
+        return 'Pending';
     }
   }
 }

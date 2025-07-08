@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/employee.dart';
 import '../models/performance_data.dart';
-import '../services/mock_data_service.dart';
+import '../services/firestore_employee_service.dart'; // Import the new Firestore service
 import '../services/auth_service.dart';
 
 class EmployeeViewModel extends ChangeNotifier
 {
+  final FirestoreEmployeeService _employeeService = FirestoreEmployeeService(); // Instantiate the new service
+
   List<Employee> _employees = [];
   Employee? _selectedEmployee;
   List<PerformanceData> _performanceData = [];
@@ -18,7 +20,7 @@ class EmployeeViewModel extends ChangeNotifier
   FilterPeriod get selectedPeriod => _selectedPeriod;
   bool get isLoading => _isLoading;
 
-  String get currentBranch => AuthService.currentUser?.branchCode ?? '';
+  String get currentBranch => AuthService.currentAppUser?.branchCode ?? '';
 
   EmployeeViewModel()
   {
@@ -41,38 +43,57 @@ class EmployeeViewModel extends ChangeNotifier
     notifyListeners();
   }
 
-  void _loadEmployees()
-  {
-    if (AuthService.currentUser == null) return;
-
-    _isLoading = true;
-    notifyListeners();
-
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _employees = MockDataService.getEmployeesByBranch(
-          AuthService.currentUser!.branchCode
-      );
+  Future<void> _loadEmployees() async // Made async
+      {
+    if (AuthService.currentAppUser == null || AuthService.currentAppUser!.branchCode == null) {
+      _employees = [];
       _selectedEmployee = null;
       _performanceData = [];
       _isLoading = false;
       notifyListeners();
-    });
+      return;
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _employees = await _employeeService.getEmployeesByBranch(
+          AuthService.currentAppUser!.branchCode!
+      );
+      _selectedEmployee = null; // Reset selection after loading new list
+      _performanceData = []; // Clear performance data
+    } catch (e) {
+      print('Error loading employees: $e');
+      _employees = []; // Clear on error
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  void _loadPerformanceData(String employeeId)
+  Future<void> _loadPerformanceData(String employeeId) async // Made async
   {
     _isLoading = true;
     notifyListeners();
 
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _performanceData = MockDataService.getPerformanceData(employeeId, _selectedPeriod);
+    try {
+      _performanceData = await _employeeService.getPerformanceData(employeeId, _selectedPeriod);
+    } catch (e) {
+      print('Error loading performance data: $e');
+      _performanceData = []; // Clear on error
+    } finally {
       _isLoading = false;
       notifyListeners();
-    });
+    }
   }
 
   void refresh()
   {
-    _loadEmployees();
+    _loadEmployees(); // Reload all employees
+    // If selected employee is still valid, reload their performance data too
+    if (_selectedEmployee != null) {
+      _loadPerformanceData(_selectedEmployee!.id);
+    }
   }
 }

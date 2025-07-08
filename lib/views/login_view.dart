@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../core/app_theme.dart';
+import '../core/app_theme.dart'; // Assuming this path is correct for your project
 import '../services/auth_service.dart';
-import 'main_screen.dart';
+import 'main_screen.dart'; // Assuming this path is correct for your project
+import 'package:firebase_auth/firebase_auth.dart'; // Import for FirebaseAuthException
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -39,15 +40,20 @@ class _LoginViewState extends State<LoginView> {
       );
 
       if (user != null && mounted) {
+        // If login is successful and user has the correct role, navigate
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const MainScreen()),
         );
-      } else {
-        setState(() {
-          _errorMessage = 'Invalid email or password';
-        });
       }
+      // No else block needed here, as AuthService will throw an exception if login fails
+      // or if the role is incorrect, which will be caught below.
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase Auth exceptions
+      setState(() {
+        _errorMessage = e.message; // Display the message from AuthService
+      });
     } catch (e) {
+      // Handle any other unexpected errors
       setState(() {
         _errorMessage = 'Login failed. Please try again.';
       });
@@ -198,9 +204,6 @@ class _LoginViewState extends State<LoginView> {
                                 color: Colors.blue,
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Text('manager1@company.com / password123'),
-                            Text('manager2@company.com / password123'),
                           ],
                         ),
                       ),

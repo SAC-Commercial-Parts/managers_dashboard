@@ -39,7 +39,7 @@ class EmployeeCard extends StatelessWidget {
         ),
         trailing: const Icon(Icons.chevron_right),
         selected: isSelected,
-        selectedTileColor: AppTheme.primaryRed.withOpacity(0.1),
+        selectedTileColor: AppTheme.primaryRed.withAlpha(56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
