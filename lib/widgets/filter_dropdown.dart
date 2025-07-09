@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/performance_data.dart';
+import '../models/performance_data.dart'; // Import the new enum
 
 class FilterDropdown extends StatelessWidget {
-  final FilterPeriod value;
-  final Function(FilterPeriod) onChanged;
+  final FilterPeriod value; // Changed type to FilterPeriod
+  final ValueChanged<FilterPeriod?> onChanged; // Changed type to FilterPeriod?
 
   const FilterDropdown({
     super.key,
@@ -13,23 +13,22 @@ class FilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<FilterPeriod>(
+    return DropdownButtonFormField<FilterPeriod>( // Changed type to FilterPeriod
       value: value,
-      decoration: const InputDecoration(
-        labelText: 'Period',
-        border: OutlineInputBorder(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        labelText: 'Filter Period',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      items: FilterPeriod.values.map((period) {
-        return DropdownMenuItem(
+      items: FilterPeriod.values.map((FilterPeriod period) { // Iterate over enum values
+        return DropdownMenuItem<FilterPeriod>(
           value: period,
-          child: Text(period.displayName),
+          child: Text(period.toDisplayString()), // Use the extension method
         );
       }).toList(),
-      onChanged: (newValue) {
-        if (newValue != null) {
-          onChanged(newValue);
-        }
-      },
     );
   }
 }

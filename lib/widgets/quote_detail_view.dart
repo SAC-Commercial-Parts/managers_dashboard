@@ -57,7 +57,7 @@ class QuoteDetailView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getStatusColor(quote.status).withOpacity(0.15),
+            color: _getStatusColor(quote.status).withAlpha(60),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -83,7 +83,7 @@ class QuoteDetailView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(quote.status).withOpacity(0.15),
+                  color: _getStatusColor(quote.status).withAlpha(60),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -230,9 +230,9 @@ class QuoteDetailView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.primaryRed.withOpacity(0.05),
+        color: AppTheme.primaryRed.withAlpha(40),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primaryRed.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primaryRed.withAlpha(64)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

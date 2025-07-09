@@ -1,15 +1,16 @@
+// lib/widgets/salesman_card.dart
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
-import '../models/rep.dart';
+import '../models/rep.dart'; // Salesmen are also Rep objects
 
-class RepCard extends StatelessWidget {
-  final Rep rep;
+class SalesmanCard extends StatelessWidget {
+  final Rep salesman; // Using Rep model for salesman
   final bool isSelected;
   final VoidCallback onTap;
 
-  const RepCard({
+  const SalesmanCard({
     super.key,
-    required this.rep,
+    required this.salesman,
     required this.isSelected,
     required this.onTap,
   });
@@ -38,7 +39,7 @@ class RepCard extends StatelessWidget {
                 radius: 24,
                 backgroundColor: AppTheme.primaryRed.withAlpha(64),
                 child: Text(
-                  rep.name.isNotEmpty ? rep.name[0].toUpperCase() : '?',
+                  salesman.name.isNotEmpty ? salesman.name[0].toUpperCase() : '?',
                   style: const TextStyle(
                     color: AppTheme.primaryRed,
                     fontWeight: FontWeight.bold,
@@ -51,7 +52,7 @@ class RepCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${rep.name} ${rep.surname}',
+                      '${salesman.name} ${salesman.surname}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -59,7 +60,7 @@ class RepCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Rep Code: ${rep.repCode ?? 'N/A'}',
+                      'Salesman Code: ${salesman.repCode ?? 'N/A'}', // Using repCode as salesman code
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
@@ -72,19 +73,13 @@ class RepCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Calls: ${rep.totalCalls}',
+                    'Calls: ${salesman.totalCalls}', // Assuming total_calls is relevant for salesmen
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[700],
                     ),
                   ),
-                  Text(
-                    'Visits: ${rep.totalVisits}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[700],
-                    ),
-                  ),
+                  // You might want to add other relevant metrics for salesmen here
                 ],
               ),
             ],

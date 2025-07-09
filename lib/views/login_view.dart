@@ -1,7 +1,8 @@
+import 'package:branch_managers_app/views/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../core/app_theme.dart';
 import '../services/auth_service.dart';
-import 'main_screen.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -9,6 +10,10 @@ class LoginView extends StatefulWidget {
   @override
   State<LoginView> createState() => _LoginViewState();
 }
+
+// lib/views/login_view.dart
+
+// ... (existing imports and class definition)
 
 class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
@@ -33,25 +38,69 @@ class _LoginViewState extends State<LoginView> {
     });
 
     try {
-      final user = await AuthService.login(
+      final authService = Provider.of<AuthService>(context, listen: false);
+
+      final user = await authService.signIn( // This could take time
         _emailController.text.trim(),
         _passwordController.text,
       );
 
-      if (user != null && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-        );
+      // --- CRITICAL CHECK ---
+      // After an await, always check if the widget is still mounted before interacting with context or state
+      if (!mounted) return;
+
+      if (user != null) {
+        // User successfully authenticated with Firebase.
+        // Now, fetch their role from Firestore.
+        final userRole = await authService.getUserRole(user.uid); // This could take time
+
+        // --- CRITICAL CHECK AGAIN ---
+        if (!mounted) return; // Check mounted status after the second await
+
+        if (userRole == 'branchmanager') {
+          // If the user has the 'branchmanager' role, navigate to MainScreen
+          // Navigator.pushReplacement also implies widget disposal
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+          );
+        } else {
+          // If the role is not 'branchmanager', log out the user and show an error
+          await authService.signOut(); // This also might be an async call
+
+          // --- CRITICAL CHECK AFTER SIGNOUT ---
+          if (!mounted) return; // Check mounted status after signOut as well
+
+          setState(() {
+            _errorMessage = 'Access denied: You do not have branch manager privileges.';
+          });
+        }
       } else {
+        // This 'else' block might be redundant if signIn throws an exception
+        // for invalid credentials, but it's good for clarity
+        // if it returns null on failure without throwing.
         setState(() {
-          _errorMessage = 'Invalid email or password';
+          _errorMessage = 'Invalid email or password.';
         });
       }
     } catch (e) {
+      // --- CRITICAL CHECK IN CATCH BLOCK ---
+      if (!mounted) return; // Ensure widget is still mounted before setting state due to error
+
+      String message = 'Login failed. Please try again.';
+      if (e is Exception) {
+        // You might want to parse specific FirebaseAuthException error codes here
+        if (e.toString().contains('user-not-found') || e.toString().contains('wrong-password')) {
+          message = 'Invalid email or password.';
+        } else {
+          message = 'Login failed: ${e.toString()}'; // Generic error for other issues
+        }
+      }
+
       setState(() {
-        _errorMessage = 'Login failed. Please try again.';
+        _errorMessage = message;
       });
     } finally {
+      // This finally block also needs to respect the mounted state
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -87,20 +136,20 @@ class _LoginViewState extends State<LoginView> {
                         color: AppTheme.primaryRed,
                       ),
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Branch Manager',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryRed,
+                          color: Theme.of(context).primaryColor, // Use theme color
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Sign in to your account',
                         style: TextStyle(
                           fontSize: 16,
-                          color: AppTheme.darkGray,
+                          color: Theme.of(context).textTheme.bodyMedium?.color, // Use theme text color
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -143,9 +192,9 @@ class _LoginViewState extends State<LoginView> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withAlpha(56),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.withOpacity(0.3)),
+                            border: Border.all(color: Colors.red.withAlpha(72)),
                           ),
                           child: Row(
                             children: [
@@ -182,28 +231,6 @@ class _LoginViewState extends State<LoginView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Column(
-                          children: [
-                            Text(
-                              'Demo Credentials:',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text('manager1@company.com / password123'),
-                            Text('manager2@company.com / password123'),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -215,3 +242,5 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 }
+
+

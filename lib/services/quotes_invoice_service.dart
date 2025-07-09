@@ -238,7 +238,7 @@ class QuotesInvoicesService {
         final quantity = random.nextInt(7) + 1;
         final unitPrice = (random.nextDouble() * 150 + 15).toDouble();
         return InvoiceItem(
-          id: 'IVI-${id}-${idx + 1}',
+          id: 'IVI-$id-${idx + 1}',
           description: description,
           quantity: quantity,
           unitPrice: unitPrice,

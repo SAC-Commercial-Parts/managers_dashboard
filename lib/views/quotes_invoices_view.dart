@@ -303,7 +303,7 @@ class QuotesInvoicesView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withAlpha(60),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -450,7 +450,7 @@ class QuotesInvoicesView extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _getQuoteStatusColor(quote.status).withOpacity(0.15),
+            color: _getQuoteStatusColor(quote.status).withAlpha(60),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -492,7 +492,7 @@ class QuotesInvoicesView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _getQuoteStatusColor(quote.status).withOpacity(0.15),
+                color: _getQuoteStatusColor(quote.status).withAlpha(60),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -507,7 +507,7 @@ class QuotesInvoicesView extends StatelessWidget {
           ],
         ),
         selected: isSelected,
-        selectedTileColor: AppTheme.primaryRed.withOpacity(0.1),
+        selectedTileColor: AppTheme.primaryRed.withAlpha(56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -530,7 +530,7 @@ class QuotesInvoicesView extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.15), // Use statusColor
+            color: statusColor.withAlpha(60), // Use statusColor
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -572,7 +572,7 @@ class QuotesInvoicesView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.15), // Use statusColor
+                color: statusColor.withAlpha(60), // Use statusColor
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -587,7 +587,7 @@ class QuotesInvoicesView extends StatelessWidget {
           ],
         ),
         selected: isSelected,
-        selectedTileColor: AppTheme.primaryRed.withOpacity(0.1),
+        selectedTileColor: AppTheme.primaryRed.withAlpha(56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),

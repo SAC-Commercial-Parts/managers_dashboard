@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../core/app_theme.dart';
-// import '../models/performance_data.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
-// import '../widgets/metric_card.dart';
-import '../widgets/filter_dropdown.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -92,14 +89,14 @@ class DashboardView extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 200,
-              child: FilterDropdown(
-                value: viewModel.selectedPeriod,
-                onChanged: viewModel.setPeriod,
-              ),
-            ),
+            // const SizedBox(width: 16),
+            // SizedBox(
+            //   width: 200,
+            //   child: FilterDropdown(
+            //     value: viewModel.selectedPeriod,
+            //     onChanged: viewModel.setPeriod,
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -179,7 +176,7 @@ class DashboardView extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               Colors.white,
-              color.withOpacity(0.05),
+              color.withAlpha(32),
             ],
           ),
         ),
@@ -193,7 +190,7 @@ class DashboardView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withAlpha(60),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -266,7 +263,7 @@ class DashboardView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryRed.withOpacity(0.1),
+                    color: AppTheme.primaryRed.withAlpha(56),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
@@ -380,7 +377,7 @@ class DashboardView extends StatelessWidget {
                     horizontalInterval: 10,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.withOpacity(0.2),
+                        color: Colors.grey.withAlpha(64),
                         strokeWidth: 1,
                       );
                     },

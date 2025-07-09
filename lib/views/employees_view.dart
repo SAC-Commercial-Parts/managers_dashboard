@@ -1,184 +1,116 @@
+// lib/views/visits_view.dart
+import 'package:branch_managers_app/models/performance_data.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../core/app_theme.dart';
-// import '../models/employee.dart';
-// import '../models/performance_data.dart';
 import '../viewmodels/employee_viewmodel.dart';
-import '../widgets/employee_card.dart';
-import '../widgets/performance_report.dart';
+import '../widgets/rep_details_and_visits_report.dart';
 import '../widgets/filter_dropdown.dart';
+import '../core/app_theme.dart';
 
-class EmployeesView extends StatelessWidget {
-  const EmployeesView({super.key});
+class VisitsView extends StatelessWidget {
+  const VisitsView({super.key});
 
   @override
-  Widget build(BuildContext context)
-  {
-    return Consumer<EmployeeViewModel>(
-      builder: (context, viewModel, child)
-      {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:
-            [
-              // Header Section
-              Card(
+  Widget build(BuildContext context) {
+    return Consumer<VisitViewModel>(
+      builder: (context, viewModel, child) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Reps List Section (unchanged)
+            Expanded(
+              flex: 1,
+              child: Card(
                 elevation: 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Row(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Branch ${viewModel.currentBranch} Employees',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryRed,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${viewModel.employees.length} employees in this branch',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
+                      Text(
+                        'Reps in Branch ${viewModel.currentBranch ?? '...'}:',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.darkGray,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(height: 16),
                       SizedBox(
-                        width: 200,
+                        width: 200, // Constrain width for the dropdown
                         child: FilterDropdown(
                           value: viewModel.selectedPeriod,
                           onChanged: viewModel.setPeriod,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Loading or Content
-              if (viewModel.isLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(48.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else
-                SizedBox(
-                  height: MediaQuery.of(context).size.height - 200,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: _buildEmployeesList(viewModel),
-                      ),
-                      if (viewModel.selectedEmployee != null) ...[
-                        const SizedBox(width: 16),
+                      const SizedBox(height: 16),
+                      if (viewModel.isLoading && viewModel.reps.isEmpty)
+                        const Center(child: CircularProgressIndicator())
+                      else if (viewModel.reps.isEmpty)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Text(
+                              'No reps found for this branch.',
+                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          ),
+                        )
+                      else
                         Expanded(
-                          flex: 2,
-                          child: PerformanceReport(
-                            employee: viewModel.selectedEmployee!,
-                            performanceData: viewModel.performanceData,
-                            period: viewModel.selectedPeriod,
+                          child: ListView.builder(
+                            itemCount: viewModel.reps.length,
+                            itemBuilder: (context, index) {
+                              final rep = viewModel.reps[index];
+                              final isSelected = viewModel.selectedRep?.id == rep.id;
+                              return Card(
+                                elevation: isSelected ? 4 : 1,
+                                color: isSelected ? AppTheme.primaryRed.withAlpha(56) : Colors.white,
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: AppTheme.primaryRed.withAlpha(64),
+                                    child: Text(
+                                      rep.name.isNotEmpty ? rep.name[0].toUpperCase() : '?',
+                                      style: const TextStyle(color: AppTheme.primaryRed),
+                                    ),
+                                  ),
+                                  title: Text('${rep.name} ${rep.surname}'),
+                                  subtitle: Text('Rep Code: ${rep.repCode}'),
+                                  onTap: () {
+                                    viewModel.selectRep(rep);
+                                  },
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),
+              ),
+            ),
+
+            // Rep Details and Visits Report Section
+            if (viewModel.selectedRep != null) ...[
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 2,
+                child: RepDetailsAndVisitsReport(
+                  rep: viewModel.selectedRep!,
+                  visits: viewModel.selectedRepVisits,
+                  period: viewModel.selectedPeriod.toDisplayString(),
+                  onCallLogged: () {
+                    // This callback will be triggered when ManagerCallLogScreen pops
+                    viewModel.fetchVisitsForSelectedRep(); // Re-fetch data to update badge
+                  },
+                ),
+              ),
             ],
-          ),
+          ],
         );
       },
-    );
-  }
-
-  Widget _buildEmployeesList(EmployeeViewModel viewModel) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.people,
-                  color: AppTheme.primaryRed,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Employees (${viewModel.employees.length})',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: viewModel.employees.isEmpty
-                ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.people_outline,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No employees found',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    'for this branch',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[500],
-                    ),
-                  ),
-                ],
-              ),
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: viewModel.employees.length,
-              itemBuilder: (context, index) {
-                final employee = viewModel.employees[index];
-                return EmployeeCard(
-                  employee: employee,
-                  isSelected: viewModel.selectedEmployee?.id == employee.id,
-                  onTap: () => viewModel.selectEmployee(employee),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

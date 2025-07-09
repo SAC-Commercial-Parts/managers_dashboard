@@ -1,45 +1,77 @@
-import '../models/user.dart';
+// lib/services/auth_service.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 
 class AuthService {
-  static User? _currentUser;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Firestore instance
 
-  // Mock login - in real app this would authenticate with backend
-  static Future<User?> login(String email, String password) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 1));
+  // Stream to listen to authentication state changes
+  Stream<User?> get user => _firebaseAuth.authStateChanges();
 
-    // Mock user data - in real app this would come from authentication API
-    final mockUsers =
-    {
-      'manager1@company.com': User(
-        id: '1',
-        name: 'John Manager',
-        email: 'manager1@company.com',
-        branchCode: 'BR001',
-        role: 'Branch Manager',
-      ),
-      'manager2@company.com': User(
-        id: '2',
-        name: 'Sarah Manager',
-        email: 'manager2@company.com',
-        branchCode: 'BR002',
-        role: 'Branch Manager',
-      ),
-    };
+  // Method to get the currently logged-in Firebase User object
+  User? get currentUser => _firebaseAuth.currentUser;
 
-    if (mockUsers.containsKey(email) && password == 'password123') {
-      _currentUser = mockUsers[email];
-      return _currentUser;
+  Future<String?> getCurrentUserId() async {
+    return _firebaseAuth.currentUser?.uid;
+  }
+  // Method to sign in with email and password
+  Future<User?> signIn(String email, String password) async {
+    try {
+      UserCredential result = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+      return result.user;
+    } on FirebaseAuthException catch (e) {
+      // Handle Firebase authentication errors (e.g., wrong password, user not found)
+      print("Firebase Auth Error: ${e.message}");
+      return null;
+    } catch (e) {
+      print("Error signing in: $e");
+      return null;
+    }
+  }
+
+  // Method to sign out
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
+  }
+
+  Future<String?> getUserBranch() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      print("No user logged in to fetch branch.");
+      return null;
     }
 
-    return null;
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('user_details').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        // Assuming 'branch' is a field directly in the user's document
+        return userDoc.get('branch');
+      } else {
+        print("User details document for ${user.uid} not found.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user branch: $e");
+      return null;
+    }
   }
 
-  static User? get currentUser => _currentUser;
+  Future<String?> getUserRole(String uid) async {
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('user_details').doc(uid).get();
 
-  static bool get isLoggedIn => _currentUser != null;
-
-  static void logout() {
-    _currentUser = null;
+      if (userDoc.exists && userDoc.data() != null && (userDoc.data() as Map<String, dynamic>).containsKey('role')) {
+        return userDoc.get('role') as String?;
+      } else {
+        print("User details document for $uid not found or 'role' field is missing.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user role for $uid: $e");
+      return null;
+    }
   }
+
 }

@@ -44,15 +44,21 @@ class Sidebar extends StatelessWidget {
             index: 0,
           ),
           _buildMenuItem(
-            icon: Icons.people,
-            title: 'Employees',
+            icon: Icons.people_alt,
+            title: 'Reps',
             index: 1,
+          ),
+          _buildMenuItem(
+            icon: Icons.person,
+            title: 'Salesmen & Calls',
+            index: 2,
           ),
           _buildMenuItem(
             icon: Icons.description,
             title: 'Quotes & Invoices',
-            index: 2,
+            index: 3,
           ),
+
         ],
       ),
     );
@@ -82,7 +88,7 @@ class Sidebar extends StatelessWidget {
           ),
         ),
         selected: isSelected,
-        selectedTileColor: AppTheme.primaryRed.withOpacity(0.1),
+        selectedTileColor: AppTheme.primaryRed.withAlpha(56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
