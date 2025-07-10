@@ -1,128 +1,118 @@
 // lib/models/sales_call.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+////////////////////////////////////////////////////////////////////////////
+//                                CALL MODEL                              //
+////////////////////////////////////////////////////////////////////////////
 class SalesCall {
-  final String id; // This is the call_id from Firestore
-  final String user; // Salesman's UID
+  final String id;
+  final String user; // Salesman's UID (matches 'id' in user_details)
   final String branch;
-  final String callDate; // YYYY-MM-DD
-  final String callWindowOpened; // HH:mm:ss
-  final String callWindowClosed; // HH:mm:ss
-  final String clientAccountNumber;
   final String clientName;
-  final String spokeTo;
-  final String? clientFeedback;
+  final String clientAccountNumber;
+  final String callDate;
+  final String callWindowOpened;
+  final String callWindowClosed;
+  final String? spokeTo;
   final String? salesmanFeedback;
+  final String? clientFeedback;
   final bool callWasPostponed;
   final bool callWasUnanswered;
-  final bool addedBusinessFocus;
-  final bool addedContact;
   final bool addedPotential;
   final bool addedVehicle;
-  final Timestamp? ts; // Timestamp of call creation/update
+  final bool addedContact;
+  final bool addedBusinessFocus;
+  final Timestamp? ts; // Timestamp of call creation
 
-  // New fields for Manager Call Log on Sales Calls (will be updated on the sales_man_calls document)
+  // Manager-specific fields
   final String? managerSpokeTo;
   final String? managerFeedback;
   final bool? isSalesmanFeedbackCorrect;
-  final bool managerCallLogged; // Flag if manager has logged a call for this sales call
-  final bool? managerCallWasUnanswered; // Flag if manager's call was unanswered
+  final bool managerCallLogged;
+  final bool? managerCallWasUnanswered;
+  final Timestamp? lastManagerCallLogTs;
+  final String? loggedByManagerId;
+
+  // NEW: Non-final fields to hold salesman name and surname for display/filtering.
+  // These are populated by the ViewModel after fetching user_details.
+  String? salesmanName;
+  String? salesmanSurname;
 
   SalesCall({
     required this.id,
     required this.user,
     required this.branch,
+    required this.clientName,
+    required this.clientAccountNumber,
     required this.callDate,
     required this.callWindowOpened,
     required this.callWindowClosed,
-    required this.clientAccountNumber,
-    required this.clientName,
-    required this.spokeTo,
-    this.clientFeedback,
+    this.spokeTo,
     this.salesmanFeedback,
-    required this.callWasPostponed,
-    required this.callWasUnanswered,
-    required this.addedBusinessFocus,
-    required this.addedContact,
-    required this.addedPotential,
-    required this.addedVehicle,
+    this.clientFeedback,
+    this.callWasPostponed = false,
+    this.callWasUnanswered = false,
+    this.addedPotential = false,
+    this.addedVehicle = false,
+    this.addedContact = false,
+    this.addedBusinessFocus = false,
     this.ts,
-    // Manager Call Log fields
     this.managerSpokeTo,
     this.managerFeedback,
     this.isSalesmanFeedbackCorrect,
     this.managerCallLogged = false,
     this.managerCallWasUnanswered,
+    this.lastManagerCallLogTs,
+    this.loggedByManagerId,
+    // Initialize new derived fields to null or default
+    this.salesmanName, // Will be set later
+    this.salesmanSurname, // Will be set later
   });
 
   factory SalesCall.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    // Helper to safely parse booleans from various types (bool, string)
-    bool parseBool(dynamic value) {
-      if (value is bool) {
-        return value;
-      } else if (value is String) {
-        return value.toLowerCase() == 'true';
+    bool parseBool(dynamic value, {bool defaultValue = false}) {
+      if (value is bool) return value;
+      if (value is String) return value.toLowerCase() == 'true';
+      return defaultValue;
+    }
+
+    bool? parseNullableBool(dynamic value) {
+      if (value is bool) return value;
+      if (value is String) {
+        if (value.toLowerCase() == 'true') return true;
+        if (value.toLowerCase() == 'false') return false;
       }
-      return false; // Default to false if not a valid boolean or string
+      return null;
     }
 
     return SalesCall(
-      id: doc.id, // Use document ID for the sales call itself
+      id: doc.id,
       user: data['user'] ?? '',
       branch: data['branch'] ?? '',
+      clientName: data['client_name'] ?? '',
+      clientAccountNumber: data['client_account_number'] ?? '',
       callDate: data['call_date'] ?? '',
       callWindowOpened: data['call_window_opened'] ?? '',
       callWindowClosed: data['call_window_closed'] ?? '',
-      clientAccountNumber: data['client_account_number'] ?? '',
-      clientName: data['client_name'] ?? '',
-      spokeTo: data['spoke_to'] ?? '',
-      clientFeedback: data['client_feedback'],
+      spokeTo: data['spoke_to'],
       salesmanFeedback: data['salesman_feedback'],
+      clientFeedback: data['client_feedback'],
       callWasPostponed: parseBool(data['call_was_postponed']),
       callWasUnanswered: parseBool(data['call_was_unanswered']),
-      addedBusinessFocus: parseBool(data['added_business_focus']),
-      addedContact: parseBool(data['added_contact']),
       addedPotential: parseBool(data['added_potential']),
       addedVehicle: parseBool(data['added_vehicle']),
+      addedContact: parseBool(data['added_contact']),
+      addedBusinessFocus: parseBool(data['added_business_focus']),
       ts: data['ts'] as Timestamp?,
-
-      // Manager Call Log fields
       managerSpokeTo: data['manager_spoke_to'],
       managerFeedback: data['manager_feedback'],
-      isSalesmanFeedbackCorrect: data['is_salesman_feedback_correct'] as bool?,
-      managerCallLogged: data['manager_call_logged'] ?? false,
-      managerCallWasUnanswered: data['manager_call_was_unanswered'] as bool?,
+      isSalesmanFeedbackCorrect: parseNullableBool(data['is_salesman_feedback_correct']),
+      managerCallLogged: parseBool(data['manager_call_logged']),
+      managerCallWasUnanswered: parseNullableBool(data['manager_call_was_unanswered']),
+      lastManagerCallLogTs: data['last_manager_call_log_ts'] as Timestamp?,
+      loggedByManagerId: data['logged_by_manager_id'],
+      // Do NOT set salesmanName/Surname here, they are derived.
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'user': user,
-      'branch': branch,
-      'call_date': callDate,
-      'call_window_opened': callWindowOpened,
-      'call_window_closed': callWindowClosed,
-      'client_account_number': clientAccountNumber,
-      'client_name': clientName,
-      'spoke_to': spokeTo,
-      'client_feedback': clientFeedback,
-      'salesman_feedback': salesmanFeedback,
-      'call_was_postponed': callWasPostponed,
-      'call_was_unanswered': callWasUnanswered,
-      'added_business_focus': addedBusinessFocus,
-      'added_contact': addedContact,
-      'added_potential': addedPotential,
-      'added_vehicle': addedVehicle,
-      'ts': ts ?? FieldValue.serverTimestamp(), // Use existing or new timestamp
-
-      // Manager Call Log fields
-      'manager_spoke_to': managerSpokeTo,
-      'manager_feedback': managerFeedback,
-      'is_salesman_feedback_correct': isSalesmanFeedbackCorrect,
-      'manager_call_logged': managerCallLogged,
-      'manager_call_was_unanswered': managerCallWasUnanswered,
-    };
   }
 }

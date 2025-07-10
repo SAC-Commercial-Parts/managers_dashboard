@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/visit.dart';
 import '../services/auth_service.dart';
-import '../models/sales_call.dart'; // Import SalesCall for history check
+import '../models/sales_call.dart';
+import '../utils/loading_and_states.dart'; // Import SalesCall for history check
 
 class ManagerCallLogViewModel extends ChangeNotifier {
+  final LoadingAndStates _loader = LoadingAndStates();
   final Visit _originalVisit;
   final AuthService _authService;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -38,31 +40,37 @@ class ManagerCallLogViewModel extends ChangeNotifier {
   bool get salesmanCallHistoryExists => _salesmanCallHistoryExists;
   String? get salesmanNameFromCallHistory => _salesmanNameFromCallHistory;
 
-  // --- NEW: Methods to update text field values and notify listeners ---
-  void updateSpokeTo(String text) {
-    spokeToController.text = text; // Update controller text if needed (though not strictly necessary here)
-    // No notifyListeners here as the controller itself handles text changes
-    // and canLogCall/canLogUnansweredCall will be re-evaluated when buttons are checked.
-    // However, if you need immediate UI reaction to validation, you could call it.
-    // For now, let's rely on button state refresh or explicit notify.
-    // If you want live validation feedback on text entry, you'd add notifyListeners here.
-    // For this context, it's better not to, as we're reacting to user interaction.
-    notifyListeners(); // Keep this here to re-evaluate canLogCall state
+  ////////////////////////////////////////////////////////////////////////////
+  //                              SPOKE TO ...                              //
+  ////////////////////////////////////////////////////////////////////////////
+  void updateSpokeTo(String text)
+  {
+    spokeToController.text = text;
   }
 
-  void updateManagerFeedback(String text) {
-    managerFeedbackController.text = text; // Update controller text if needed
-    notifyListeners(); // Keep this here to re-evaluate canLogCall state
+  ////////////////////////////////////////////////////////////////////////////
+  //                          MANAGERS FEEDBACK                             //
+  ////////////////////////////////////////////////////////////////////////////
+  void updateManagerFeedback(String text)
+  {
+    managerFeedbackController.text = text;
+    notifyListeners();
   }
-  // --- END NEW ---
 
-
-  void setIsClientFeedbackCorrect(bool? value) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                    FEEDBACK VALIDATION BY MANAGER                      //
+  ////////////////////////////////////////////////////////////////////////////
+  void setIsClientFeedbackCorrect(bool? value)
+  {
     _isClientFeedbackCorrect = value;
     notifyListeners();
   }
 
-  void setCallWasUnanswered(bool? value) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            CALL UNANSWERED                             //
+  ////////////////////////////////////////////////////////////////////////////
+  void setCallWasUnanswered(bool? value)
+  {
     _callWasUnanswered = value ?? false;
     if (_callWasUnanswered) {
       spokeToController.clear();
@@ -72,24 +80,25 @@ class ManagerCallLogViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Validation getters
-  bool get canLogCall {
-    // A call can be logged if it's not marked as unanswered
-    // AND spokeTo is not empty
-    // AND either manager feedback is not empty OR client feedback correctness is set
+  ////////////////////////////////////////////////////////////////////////////
+  //                                 GETTERS                                //
+  ////////////////////////////////////////////////////////////////////////////
+  bool get canLogCall
+  {
     return !_callWasUnanswered &&
         spokeToController.text.trim().isNotEmpty &&
         (managerFeedbackController.text.trim().isNotEmpty || _isClientFeedbackCorrect != null);
   }
-
-  bool get canLogUnansweredCall {
-    // An unanswered call can be logged if the callWasUnanswered flag is true
-    // This allows logging an unanswered call without needing spokeTo or feedback.
+  bool get canLogUnansweredCall
+  {
     return _callWasUnanswered;
   }
 
-
-  Future<void> _checkSalesmanCallHistory() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                SALESMAN CALL HISTORY FOR SELECTED CLIENT               //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _checkSalesmanCallHistory() async
+  {
     try {
       final querySnapshot = await _firestore
           .collection('sales_man_calls')
@@ -102,19 +111,25 @@ class ManagerCallLogViewModel extends ChangeNotifier {
         _salesmanCallHistoryExists = true;
         final latestCall = SalesCall.fromFirestore(querySnapshot.docs.first);
 
-        // Fetch salesman name from user_details
-        final salesmanDetails = await _firestore.collection('user_details').doc(latestCall.user).get();
-        if (salesmanDetails.exists) {
-          _salesmanNameFromCallHistory = (salesmanDetails.data()?['name'] ?? 'Unknown') (salesmanDetails.data()?['surname'] ?? '');
+// Fetch salesman name from user_details by querying the 'id' field
+        final userDetailsQuerySnapshot = await _firestore
+            .collection('user_details')
+            .where('id', isEqualTo: latestCall.user) // <--- CRITICAL CHANGE: Query by the 'id' field
+            .limit(1) // Limit to 1 result, as IDs should be unique
+            .get();
+
+        if (userDetailsQuerySnapshot.docs.isNotEmpty) {
+          // If a document matching the 'id' field is found
+          final salesmanDetailsData = userDetailsQuerySnapshot.docs.first.data();
+          _salesmanNameFromCallHistory = (salesmanDetailsData['name'] ?? 'Unknown')  (salesmanDetailsData['surname'] ?? '');
         } else {
-          _salesmanNameFromCallHistory = 'Unknown Salesman (ID: ${latestCall.user})';
+          _salesmanNameFromCallHistory = 'Unknown Salesman (ID: ${latestCall.user})'; // Changed to ID as email is not found here
         }
       } else {
         _salesmanCallHistoryExists = false;
         _salesmanNameFromCallHistory = null;
       }
     } catch (e) {
-      print('Error checking salesman call history: $e');
       _salesmanCallHistoryExists = false;
       _salesmanNameFromCallHistory = null;
     } finally {
@@ -123,7 +138,11 @@ class ManagerCallLogViewModel extends ChangeNotifier {
   }
 
 
-  Future<void> saveCallLog({bool isUnanswered = false}) async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             SAVE CALL LOG                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> saveCallLog({bool isUnanswered = false}) async
+  {
     _isLoading = true;
     notifyListeners();
 
@@ -146,7 +165,6 @@ class ManagerCallLogViewModel extends ChangeNotifier {
       };
 
       await _firestore.collection('rep_visits').doc(_originalVisit.id).update(updatedVisitData);
-      print('Original visit updated successfully: ${_originalVisit.id}');
 
       // 2. Add a new document to 'managers_call_logs' collection
       final Map<String, dynamic> callLogData = {
@@ -170,10 +188,9 @@ class ManagerCallLogViewModel extends ChangeNotifier {
       };
 
       await _firestore.collection('managers_call_logs').add(callLogData);
-      print('Manager call log added successfully.');
 
     } catch (e) {
-      print('Error saving manager call log: $e');
+      _loader.showError("Error saving call log: $e");
       rethrow; // Re-throw to be caught by the UI
     } finally {
       _isLoading = false;
@@ -181,8 +198,12 @@ class ManagerCallLogViewModel extends ChangeNotifier {
     }
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                 DISPOSE                                //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  void dispose() {
+  void dispose()
+  {
     managerFeedbackController.dispose();
     spokeToController.dispose();
     super.dispose();

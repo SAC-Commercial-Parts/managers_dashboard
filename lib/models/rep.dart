@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Rep {
+////////////////////////////////////////////////////////////////////////////
+//                            SALESMAN MODEL                              //
+////////////////////////////////////////////////////////////////////////////
+class Salesman {
   final String id;
   final String name;
   final String surname;
@@ -12,11 +15,13 @@ class Rep {
   final int totalNewClientRequest;
   final bool isApproved;
   final bool isApprovedRep;
+  final bool isApprovedSalesman;
   final double? currentLat;
   final double? currentLong;
   final Timestamp? ts;
 
-  Rep({
+  Salesman(
+    this.isApprovedSalesman, {
     required this.id,
     required this.name,
     required this.surname,
@@ -33,9 +38,10 @@ class Rep {
     this.ts,
   });
 
-  factory Rep.fromFirestore(DocumentSnapshot doc) {
+  factory Salesman.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return Rep(
+    return Salesman(
+      data['isApprovedSalesman'] ?? false,
       id: data['id'] ?? doc.id,
       name: data['name'] ?? '',
       surname: data['surname'] ?? '',

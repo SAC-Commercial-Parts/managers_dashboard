@@ -5,11 +5,16 @@ import '../core/app_theme.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 
 class DashboardView extends StatelessWidget {
+  static const id = '/dashboard';
   const DashboardView({super.key});
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context)
   {
+    // USING DASHBOARD VIEWMODEL
     return Consumer<DashboardViewModel>(
       builder: (context, viewModel, child) {
         return SingleChildScrollView(
@@ -18,11 +23,15 @@ class DashboardView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children:
             [
-              // Header Section
+              ////////////////////////////////////////////////////////////////////////////
+              //                              HEADER SECTION                            //
+              ////////////////////////////////////////////////////////////////////////////
               _buildHeaderSection(viewModel),
               const SizedBox(height: 24),
 
-              // Loading or Content
+              ////////////////////////////////////////////////////////////////////////////
+              //                             LOADING ICON                               //
+              ////////////////////////////////////////////////////////////////////////////
               if (viewModel.isLoading)
                 const Center(
                   child: Padding(
@@ -32,15 +41,18 @@ class DashboardView extends StatelessWidget {
                 )
               else ...
               [
-                // Metrics Grid
+                ////////////////////////////////////////////////////////////////////////////
+                //                                MAIN DATA                               //
+                ////////////////////////////////////////////////////////////////////////////
+                // METRICS GRID
                 _buildMetricsGrid(viewModel.branchSummary),
                 const SizedBox(height: 24),
 
-                // Performance Chart
+                // PERFORMANCE GRAPH
                 _buildPerformanceChart(viewModel.branchSummary),
                 const SizedBox(height: 24),
 
-                // Additional Stats
+                // ADDITIONAL STATS
                 _buildAdditionalStats(viewModel.branchSummary),
               ],
             ],
@@ -50,6 +62,9 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                              BUILD HEADER                              //
+  ////////////////////////////////////////////////////////////////////////////
   Widget _buildHeaderSection(DashboardViewModel viewModel)
   {
     return Card(
@@ -103,6 +118,9 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                               METRICS GRID                             //
+  ////////////////////////////////////////////////////////////////////////////
   Widget _buildMetricsGrid(Map<String, double> summary)
   {
     return LayoutBuilder(
@@ -123,6 +141,7 @@ class DashboardView extends StatelessWidget {
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           children: [
+            // DELIVERIES
             _buildEnhancedMetricCard(
               title: 'Total Deliveries',
               value: summary['deliveries']?.toInt().toString() ?? '0',
@@ -130,6 +149,7 @@ class DashboardView extends StatelessWidget {
               color: AppTheme.primaryRed,
               subtitle: 'Completed deliveries',
             ),
+            // QUOTES
             _buildEnhancedMetricCard(
               title: 'Total Quotes',
               value: summary['quotes']?.toInt().toString() ?? '0',
@@ -137,6 +157,7 @@ class DashboardView extends StatelessWidget {
               color: AppTheme.darkRed,
               subtitle: 'Generated quotes',
             ),
+            // CONVERSIONS
             _buildEnhancedMetricCard(
               title: 'Conversions',
               value: summary['conversions']?.toInt().toString() ?? '0',
@@ -144,6 +165,7 @@ class DashboardView extends StatelessWidget {
               color: Colors.green,
               subtitle: 'Successful conversions',
             ),
+            // CALLS
             _buildEnhancedMetricCard(
               title: 'Total Calls',
               value: summary['calls']?.toInt().toString() ?? '0',
@@ -157,6 +179,10 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                                METRICS CARD                            //
+  ////////////////////////////////////////////////////////////////////////////
   Widget _buildEnhancedMetricCard({
     required String title,
     required String value,
@@ -208,6 +234,7 @@ class DashboardView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
+              // VALUE
               Text(
                 value,
                 style: TextStyle(
@@ -217,6 +244,7 @@ class DashboardView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
+              // TITLE
               Text(
                 title,
                 style: const TextStyle(
@@ -225,6 +253,7 @@ class DashboardView extends StatelessWidget {
                   color: AppTheme.darkGray,
                 ),
               ),
+              // SUBTITLE
               Text(
                 subtitle,
                 style: TextStyle(
@@ -239,6 +268,9 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                           PERFORMANCE GRAPH                            //
+  ////////////////////////////////////////////////////////////////////////////
   Widget _buildPerformanceChart(Map<String, double> summary)
   {
     return Card(
@@ -251,6 +283,7 @@ class DashboardView extends StatelessWidget {
           children: [
             Row(
               children: [
+                // TITLE
                 const Text(
                   'Branch Performance Overview',
                   style: TextStyle(
@@ -278,6 +311,7 @@ class DashboardView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
+            // GRAPH/CHART
             SizedBox(
               height: 300,
               child: BarChart(
@@ -392,6 +426,10 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                            ADDITIONAL STATS                            //
+  ////////////////////////////////////////////////////////////////////////////
   Widget _buildAdditionalStats(Map<String, double> summary)
   {
     final conversionRate = summary['quotes'] != null && summary['quotes']! > 0
@@ -447,7 +485,9 @@ class DashboardView extends StatelessWidget {
             ),
           ),
         ),
+
         const SizedBox(width: 16),
+
         Expanded(
           child: Card(
             elevation: 2,

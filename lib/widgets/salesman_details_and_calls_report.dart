@@ -7,7 +7,7 @@ import '../models/sales_call.dart';
 import '../views/screens/manager_sales_call_log_screen.dart';
 
 class SalesmanDetailsAndCallsReport extends StatelessWidget {
-  final Rep salesman;
+  final Salesman salesman;
   final List<SalesCall> calls;
   final String period;
   final VoidCallback? onCallLogged; // Callback to refresh calls list
@@ -20,8 +20,12 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
     this.onCallLogged,
   });
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -32,13 +36,14 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
           children: [
             _buildSalesmanDetailsCard(context),
             const SizedBox(height: 20),
+            // HEADER
             Row(
               children: [
                 const Icon(Icons.call, color: AppTheme.primaryRed, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  'Recent Calls ($period)',
-                  style: const TextStyle(
+                const Text(
+                  'Recent Calls',
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -54,10 +59,15 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
               ],
             ),
             const Divider(height: 20),
+
+            ////////////////////////////////////////////////////////////////////////////
+            //                                MAIN DATA                               //
+            ////////////////////////////////////////////////////////////////////////////
             Expanded(
               child: calls.isEmpty
                   ? Center(
                 child: Column(
+                  // NO CALLS
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
@@ -84,6 +94,7 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
                   ],
                 ),
               )
+              // CALL LIST
                   : ListView.builder(
                 itemCount: calls.length,
                 itemBuilder: (context, index) {
@@ -98,7 +109,11 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
     );
   }
 
-  Widget _buildSalesmanDetailsCard(BuildContext context) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               DETAILS CARD                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildSalesmanDetailsCard(BuildContext context)
+  {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -154,7 +169,7 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
             const Divider(height: 24),
             _buildDetailRow(context, Icons.phone_android, 'Total Calls', '${salesman.totalCalls}'),
             _buildDetailRow(context, Icons.check_circle_outline, 'Approved', salesman.isApproved ? 'Yes' : 'No', iconColor: salesman.isApproved ? Colors.green : Colors.red),
-            _buildDetailRow(context, Icons.verified_user, 'Salesman Approved', salesman.isApprovedRep ? 'Yes' : 'No', iconColor: salesman.isApprovedRep ? Colors.green : Colors.red),
+            _buildDetailRow(context, Icons.verified_user, 'Salesman Approved', salesman.isApprovedSalesman ? 'Yes' : 'No', iconColor: salesman.isApprovedSalesman ? Colors.green : Colors.red),
             if (salesman.ts != null)
               _buildDetailRow(context, Icons.update, 'Last Updated', DateFormat('yyyy-MM-dd HH:mm').format(salesman.ts!.toDate())),
           ],
@@ -163,7 +178,11 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(BuildContext context, IconData icon, String label, String value, {Color? iconColor}) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                DETAILS ROW                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildDetailRow(BuildContext context, IconData icon, String label, String value, {Color? iconColor})
+  {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -193,7 +212,11 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
     );
   }
 
-  Widget _buildSalesCallCard(BuildContext context, SalesCall call) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              SALES CALL CARD                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildSalesCallCard(BuildContext context, SalesCall call)
+  {
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 1,
@@ -240,7 +263,10 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCallDetailRow(context, 'Spoke to:', call.spokeTo),
+                ////////////////////////////////////////////////////////////////////////////
+                //                                 CALL DATA                              //
+                ////////////////////////////////////////////////////////////////////////////
+                _buildCallDetailRow(context, 'Spoke to:', call.spokeTo!),
                 _buildCallDetailRow(context, 'Client Feedback:', call.clientFeedback ?? 'N/A'),
                 _buildCallDetailRow(context, 'Salesman Feedback:', call.salesmanFeedback ?? 'N/A'),
                 _buildCallDetailRow(context, 'Call Postponed:', call.callWasPostponed ? 'Yes' : 'No'),
@@ -258,7 +284,9 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
 
                 const SizedBox(height: 16), // Spacer before the button
 
-                // --- ADD THE NEW BUTTON HERE ---
+                ////////////////////////////////////////////////////////////////////////////
+                //                             LOG CALL BUTTON                            //
+                ////////////////////////////////////////////////////////////////////////////
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -295,7 +323,11 @@ class SalesmanDetailsAndCallsReport extends StatelessWidget {
     );
   }
 
-  Widget _buildCallDetailRow(BuildContext context, String label, String value) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               CALL DETAILS                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildCallDetailRow(BuildContext context, String label, String value)
+  {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(

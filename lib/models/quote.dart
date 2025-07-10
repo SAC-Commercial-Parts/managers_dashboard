@@ -1,5 +1,8 @@
 enum QuoteStatus { pending, converted, rejected, expired }
-
+////////////////////////////////////////////////////////////////////////////
+//                              QUOTE MODEL                               //
+////////////////////////////////////////////////////////////////////////////
+// TO BE AMENDED [THIS WAS FOR MOCK DATA]
 class Quote {
   final String id;
   final String clientName;

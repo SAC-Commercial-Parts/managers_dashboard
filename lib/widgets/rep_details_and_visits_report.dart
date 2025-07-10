@@ -7,7 +7,7 @@ import '../models/visit.dart';
 import '../views/screens/manager_call_log_screen.dart'; // Import the new screen
 
 class RepDetailsAndVisitsReport extends StatelessWidget {
-  final Rep rep;
+  final Salesman rep;
   final List<Visit> visits;
   final String period;
   final VoidCallback? onCallLogged;
@@ -116,9 +116,15 @@ class RepDetailsAndVisitsReport extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text(
-              '${visit.dateVisited} at ${visit.timeVisited}',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            Row(
+              children: [
+                Text(
+                  '${visit.dateVisited} at ${visit.timeVisited}',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                ),
+                const SizedBox(width: 80,),
+                _buildVisitRatingRow(context, 'Overall Happiness:', visit.happy),
+              ],
             ),
             Text(
               'Account: ${visit.clientAccountNumber}',

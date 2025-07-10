@@ -1,80 +1,221 @@
+// lib/viewmodels/dashboard_viewmodel.dart
 import 'package:flutter/material.dart';
-// Ensure this path is correct, assuming you have a performance_data.dart or similar
-// This import seems to imply a data model, but it's not directly used in the provided snippet.
-// If you intend to use it for data, ensure it's properly integrated.
-// For now, I'll keep it as is, but it might be vestigial if not used.
-import '../models/performance_data.dart';
-import '../services/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase User type
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import for User type
 
-class DashboardViewModel extends ChangeNotifier {
+import '../models/performance_data.dart'; // Assuming FilterPeriod is here
+import '../models/sales_call.dart';     // Import your SalesCall model
+import '../models/rep.dart';           // Import your Salesman/Rep model
+import '../services/auth_service.dart';
+import '../utils/loading_and_states.dart';
+
+////////////////////////////////////////////////////////////////////////////
+//                          DASHBOARD VIEW MODEL                          //
+////////////////////////////////////////////////////////////////////////////
+class DashboardViewModel extends ChangeNotifier
+{
+  final LoadingAndStates _loader = LoadingAndStates();
   final AuthService _authService;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Add Firestore instance
 
   FilterPeriod _selectedPeriod = FilterPeriod.last30Days;
   Map<String, double> _branchSummary = {};
   bool _isLoading = false;
 
+  User? get _currentUser => _authService.currentUser;
+  String? _userBranch;
+  String get currentBranch {
+    return _userBranch ?? 'Loading Branch...';
+  }
+
+  String? _managerName;
+  String get managerName {
+    return _managerName ?? 'Loading Name...';
+  }
+
+  // --- Search related properties ---
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController(); // Initialize controller
+  List<SalesCall> _allSalesCalls = []; // Stores all sales calls for the branch
+  List<Salesman> _allSalesmen = []; // Stores all salesmen for the branch
+  // --- End Search related properties ---
+
+
   FilterPeriod get selectedPeriod => _selectedPeriod;
   Map<String, double> get branchSummary => _branchSummary;
   bool get isLoading => _isLoading;
 
-  User? get _currentUser => _authService.currentUser;
-  String? _userBranch; // Nullable as it's fetched asynchronously
-  String get currentBranch {
-    return _userBranch ?? 'Loading Branch...'; // Provide a loading state
-  }
+  // --- Search related getters ---
+  TextEditingController get searchController => _searchController;
+  String get searchQuery => _searchQuery;
 
-  String? _managerName; // Nullable as it's fetched asynchronously
-  String get managerName {
-    return _managerName ?? 'Loading Name...'; // Provide a loading state
-  }
+  // Returns the filtered list of sales calls
+  List<SalesCall> get salesCalls => _getFilteredSalesCalls();
+  // Returns all salesmen (you might add filtering for salesmen later if needed)
+  List<Salesman> get salesmen => _allSalesmen;
 
-  // Constructor now requires AuthService
-  DashboardViewModel(this._authService) {
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                               CONSTRUCTOR                              //
+  ////////////////////////////////////////////////////////////////////////////
+  DashboardViewModel(this._authService)
+  {
     _loadInitialData();
+    // Listen to changes in the search controller
+    _searchController.addListener(_onSearchChanged);
   }
 
-  Future<void> _loadInitialData() async {
-    // Initialize user details first
-    if (_currentUser != null) {
-      _managerName = _currentUser!.displayName ?? _currentUser!.email;
-      _userBranch = await _authService.getUserBranch();
-    }
-    // No need to notifyListeners here as _loadBranchSummary will do it,
-    // and this method is called within the constructor.
-    // If you need UI updates *before* branch summary, then keep it.
-
-    await _loadBranchSummary(); // Await this to ensure summary loads after branch
+  ////////////////////////////////////////////////////////////////////////////
+  //                              SEARCH METHODS                            //
+  ////////////////////////////////////////////////////////////////////////////
+  void _onSearchChanged()
+  {
+    _searchQuery = _searchController.text;
+    notifyListeners(); // Re-filter and update UI when search query changes
   }
-
-  void setPeriod(FilterPeriod period) {
-    if (_selectedPeriod != period) {
-      _selectedPeriod = period;
-      _loadBranchSummary();
-    }
-  }
-
-  Future<void> _loadBranchSummary() async {
-    if (_currentUser == null) {
-      _branchSummary = {};
-      _isLoading = false;
-      notifyListeners();
-      print("No user logged in. Clearing branch summary.");
-      return;
-    }
-
-    _isLoading = true;
+  // Method to manually set search query if needed (e.g., from an external button)
+  void setSearchQuery(String query)
+  {
+    _searchQuery = query;
+    _searchController.text = query; // Keep controller in sync
     notifyListeners();
+  }
+  // The actual filtering logic for sales calls
+  List<SalesCall> _getFilteredSalesCalls()
+  {
+    if (_searchQuery.isEmpty) {
+      return _allSalesCalls; // Return all calls if no search query
+    }
 
-    // Ensure branch is available before trying to get summary
-    if (_userBranch == null) {
-      _userBranch = await _authService.getUserBranch();
-      if (_userBranch == null) {
-        print("Error: Could not determine user branch for summary. Please ensure user_details is set up correctly for this user.");
+    final query = _searchQuery.toLowerCase();
+    return _allSalesCalls.where((call) {
+      // Check client name, account number, and salesman name
+      final clientName = call.clientName.toLowerCase();
+      final accountNumber = call.clientAccountNumber.toLowerCase();
+
+      // Combine salesman name and surname for searching
+      final salesmanFullName = '${call.salesmanName ?? ''} ${call.salesmanSurname ?? ''}'.toLowerCase();
+
+      return clientName.contains(query) ||
+          accountNumber.contains(query) ||
+          salesmanFullName.contains(query);
+    }).toList();
+  }
+  // --- End of Search methods ---
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                              INITIAL DATA                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _loadInitialData() async
+  {
+    _isLoading = true; // Set loading true at the very beginning
+    notifyListeners(); // Notify listeners to show loading state
+
+    try {
+      if (_currentUser != null) {
+        _managerName = _currentUser!.displayName ?? _currentUser!.email;
+        _userBranch = await _authService.getUserBranch();
+      } else {
+        // If no user, reset relevant states and return
+        _managerName = null;
+        _userBranch = null;
+        _allSalesCalls = [];
+        _allSalesmen = [];
+        _branchSummary = {};
         _isLoading = false;
         notifyListeners();
         return;
       }
+
+      // If branch still null after trying to fetch
+      if (_userBranch == null) {
+        _loader.showError("Branch information not found for the current user.");
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      // Load sales calls and salesmen (needed for search and display)
+      await _fetchSalesCallsAndSalesmen();
+
+      // Load branch summary (this will also call notifyListeners)
+      await _loadBranchSummary();
+
+    } catch (e) {
+      _loader.showError("Error loading initial data: $e");
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                           FETCH SALES CALLS                            //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _fetchSalesCallsAndSalesmen() async
+  {
+    if (_userBranch == null) return; // Cannot fetch without a branch
+
+    try {
+      // Fetch sales calls for the current branch
+      final callsSnapshot = await _firestore
+          .collection('sales_man_calls')
+          .where('branch', isEqualTo: _userBranch)
+          .orderBy('call_date', descending: true) // Example: order by date
+          .get();
+
+      _allSalesCalls = callsSnapshot.docs.map((doc) => SalesCall.fromFirestore(doc)).toList();
+
+      // Fetch salesmen for the current branch
+      final salesmenSnapshot = await _firestore
+          .collection('user_details')
+          .where('branch_name', isEqualTo: _userBranch)
+          .where('role', isEqualTo: 'salesMan') // Only fetch salesmen
+          .get();
+
+      _allSalesmen = salesmenSnapshot.docs.map((doc) => Salesman.fromFirestore(doc)).toList();
+
+      // Notify listeners here if you want UI to update as soon as calls/salesmen are loaded,
+      // even before the summary.
+      // notifyListeners(); // Or wait for _loadBranchSummary to do it.
+
+    } catch (e) {
+      _loader.showError("Error fetching sales calls and salesmen: $e");
+      _allSalesCalls = []; // Clear on error
+      _allSalesmen = [];
+    }
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                               SEARCH PERIOD                            //
+  ////////////////////////////////////////////////////////////////////////////
+  void setPeriod(FilterPeriod period)
+  {
+    if (_selectedPeriod != period) {
+      _selectedPeriod = period;
+      _loadBranchSummary(); // This will trigger notifyListeners
+    }
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                               BRANCH SUMMARY                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _loadBranchSummary() async
+  {
+    if (!_isLoading) {
+      _isLoading = true;
+      notifyListeners();
+    }
+
+
+    if (_userBranch == null) {
+      _branchSummary = {};
+      _isLoading = false;
+      notifyListeners();
+      return;
     }
 
     DateTime endDate = DateTime.now();
@@ -103,50 +244,37 @@ class DashboardViewModel extends ChangeNotifier {
         break;
     }
 
-    // --- Fix for unused_local_variable: Integrate startDate and endDate ---
-    // If you had a MockDataService.getBranchSummary, it would look like this:
-    // _branchSummary = MockDataService.getBranchSummary(
-    //     _userBranch!,
-    //     startDate, // Pass startDate
-    //     endDate,   // Pass endDate
-    // );
-
-    // Since you commented out the mock service, I'll put a placeholder
-    // that uses the variables, effectively removing the warning.
-    // In a real app, this is where you'd fetch from Firestore/backend
-    // using startDate and endDate for filtering.
     try {
-      // Example of how you would use startDate and endDate with Firestore:
-      // Assuming 'visits' collection has a 'visit_date' field as String 'YYYY-MM-DD'
-      // Or 'ts' field as Timestamp. Adjust query based on your actual data structure.
+      // --- IMPORTANT: Replace this mock data fetching with your actual Firestore queries ---
+      // This part needs to be implemented to fetch real data based on _userBranch, startDate, and endDate.
+      // Example for fetching counts from 'sales_man_calls':
+      // You'll need to count documents within the date range and for the specific branch.
+      // This often involves aggregation queries or fetching all relevant docs and counting client-side.
 
-      // For example, if you query a 'dashboard_summaries' collection
-      // that pre-calculates data per branch and period:
-      // final docSnapshot = await FirebaseFirestore.instance
-      //     .collection('dashboard_summaries')
-      //     .doc(_userBranch) // Or a composite ID like '${_userBranch}_${_selectedPeriod.toString()}'
-      //     .get();
-      //
-      // if (docSnapshot.exists) {
-      //   _branchSummary = Map<String, double>.from(docSnapshot.data() ?? {});
-      // } else {
-      //   _branchSummary = {'total_visits': 0.0, 'total_sales': 0.0}; // Default
-      // }
+      // For total calls:
+      final salesCallsCountSnapshot = await _firestore
+          .collection('sales_man_calls')
+          .where('branch', isEqualTo: _userBranch)
+          .where('ts', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('ts', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .get();
+      final totalCalls = salesCallsCountSnapshot.docs.length;
 
-      // For now, let's keep a mock response to demonstrate the variable usage
-      // and remove the warning. Replace this with your actual data fetching logic.
+      // You would do similar queries for 'total_visits', 'total_sales', etc.,
+      // based on how your data is structured. If 'total_sales' is not a direct field
+      // in 'sales_man_calls', you'd need another collection or different logic.
+
+      // For demonstration, still using dummy data with the totalCalls
       await Future.delayed(const Duration(milliseconds: 500)); // Simulate network delay
       _branchSummary = {
-        'total_visits': 100.0 * (_selectedPeriod.index + 1), // Dummy data
-        'total_calls': 50.0 * (_selectedPeriod.index + 1),
-        'total_sales': 15000.0 * (_selectedPeriod.index + 1),
-        'period_start': double.parse(startDate.day.toString()), // Using startDate
-        'period_end': double.parse(endDate.day.toString()),     // Using endDate
+        'total_visits': totalCalls.toDouble(), // Example: using totalCalls as visits
+        'total_calls': totalCalls.toDouble(),
+        'total_sales': 15000.0 * (totalCalls > 0 ? (totalCalls / 50) : 1), // Dummy sales based on calls
+        'period_start': double.parse(startDate.day.toString()),
+        'period_end': double.parse(endDate.day.toString()),
       };
-      print('Dashboard data loaded for branch: $_userBranch, Period: ${_selectedPeriod.toDisplayString()}');
-      print('Start Date: $startDate, End Date: $endDate'); // Confirmation
     } catch (e) {
-      print("Error loading branch summary: $e");
+      _loader.showError("Error loading branch summary: $e");
       _branchSummary = {}; // Clear on error
     } finally {
       _isLoading = false;
@@ -154,7 +282,22 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  void refresh() {
-    _loadBranchSummary();
+  ////////////////////////////////////////////////////////////////////////////
+  //                              REFRESH DATA                              //
+  ////////////////////////////////////////////////////////////////////////////
+  void refresh()
+  {
+    _loadInitialData(); // This will re-fetch everything including branch summary
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                                  DISPOSE                               //
+  ////////////////////////////////////////////////////////////////////////////
+  @override
+  void dispose()
+  {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 }

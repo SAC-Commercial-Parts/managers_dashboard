@@ -2,7 +2,11 @@ import '../models/quote.dart';
 import '../models/invoice.dart';
 import 'dart:math';
 
-class QuotesInvoicesService {
+////////////////////////////////////////////////////////////////////////////
+//                         QUOTES AND INVOICE SERVICE                     //
+////////////////////////////////////////////////////////////////////////////
+class QuotesInvoicesService
+{
   static final List<Quote> _quotes = _generateMockQuotes();
   static final List<Invoice> _invoices = _generateMockInvoices();
 
@@ -13,11 +17,20 @@ class QuotesInvoicesService {
     return _quotes.where((q) => q.branchCode == branchCode).toList();
   }
 
-  static List<Invoice> getInvoicesByBranch(String branchCode) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                          GET BRANCH INVOICES                           //
+  ////////////////////////////////////////////////////////////////////////////
+  // MIGHT NEED TO BE AMENDED, WAS FOR MOCK DATA
+  static List<Invoice> getInvoicesByBranch(String branchCode)
+  {
     return _invoices.where((i) => i.branchCode == branchCode).toList();
   }
 
-  static List<Quote> getQuotesByDateRange(String branchCode, DateTime startDate, DateTime endDate) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             FILTER QUOTES                              //
+  ////////////////////////////////////////////////////////////////////////////
+  static List<Quote> getQuotesByDateRange(String branchCode, DateTime startDate, DateTime endDate)
+  {
     return _quotes.where((q) =>
     q.branchCode == branchCode &&
         q.dateCreated.isAfter(startDate.subtract(const Duration(days: 1))) &&
@@ -25,7 +38,11 @@ class QuotesInvoicesService {
     ).toList();
   }
 
-  static List<Invoice> getInvoicesByDateRange(String branchCode, DateTime startDate, DateTime endDate) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            INVOICE BY DATE                             //
+  ////////////////////////////////////////////////////////////////////////////
+  static List<Invoice> getInvoicesByDateRange(String branchCode, DateTime startDate, DateTime endDate)
+  {
     return _invoices.where((i) =>
     i.branchCode == branchCode &&
         i.dateCreated.isAfter(startDate.subtract(const Duration(days: 1))) &&
@@ -33,7 +50,11 @@ class QuotesInvoicesService {
     ).toList();
   }
 
-  static Quote? getQuoteById(String id) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              QUOTE BY ID                               //
+  ////////////////////////////////////////////////////////////////////////////
+  static Quote? getQuoteById(String id)
+  {
     try {
       return _quotes.firstWhere((q) => q.id == id);
     } catch (e) {
@@ -41,7 +62,11 @@ class QuotesInvoicesService {
     }
   }
 
-  static Invoice? getInvoiceById(String id) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              INVOICE BY ID                             //
+  ////////////////////////////////////////////////////////////////////////////
+  static Invoice? getInvoiceById(String id)
+  {
     try {
       return _invoices.firstWhere((i) => i.id == id);
     } catch (e) {
@@ -49,7 +74,11 @@ class QuotesInvoicesService {
     }
   }
 
-  static List<Quote> _generateMockQuotes() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               MOCK QUOTES                              //
+  ////////////////////////////////////////////////////////////////////////////
+  static List<Quote> _generateMockQuotes()
+  {
     final random = Random();
     final quotes = <Quote>[];
     final branches = ['BR001', 'BR002'];
@@ -112,7 +141,11 @@ class QuotesInvoicesService {
     return quotes;
   }
 
-  static List<Invoice> _generateMockInvoices() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              MOCK INVOICES                             //
+  ////////////////////////////////////////////////////////////////////////////
+  static List<Invoice> _generateMockInvoices()
+  {
     final random = Random();
     final invoices = <Invoice>[];
     final branches = ['BR001', 'BR002'];

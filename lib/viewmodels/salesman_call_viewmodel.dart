@@ -5,48 +5,69 @@ import '../models/performance_data.dart';
 import '../models/rep.dart'; // Reusing Rep model for salesmen
 import '../models/sales_call.dart';
 import '../services/auth_service.dart';
+import '../utils/loading_and_states.dart';
 
-class SalesmanCallViewModel extends ChangeNotifier {
+////////////////////////////////////////////////////////////////////////////
+//                        SALESMAN CALL VIEWMODEL                         //
+////////////////////////////////////////////////////////////////////////////
+class SalesmanCallViewModel extends ChangeNotifier
+{
+  final LoadingAndStates _loader = LoadingAndStates();
   final AuthService _authService;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  List<Rep> _salesmen = [];
-  Rep? _selectedSalesman;
+  List<Salesman> _salesmen = [];
+  Salesman? _selectedSalesman;
   List<SalesCall> _selectedSalesmanCalls = [];
   bool _isLoading = false;
   FilterPeriod _selectedPeriod = FilterPeriod.last30Days; // Default period
 
   String? _currentBranch;
 
-  SalesmanCallViewModel(this._authService) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               CONSTRUCTOR                              //
+  ////////////////////////////////////////////////////////////////////////////
+  SalesmanCallViewModel(this._authService)
+  {
     _init();
   }
 
-  List<Rep> get salesmen => _salesmen;
-  Rep? get selectedSalesman => _selectedSalesman;
+  List<Salesman> get salesmen => _salesmen;
+  Salesman? get selectedSalesman => _selectedSalesman;
   List<SalesCall> get selectedSalesmanCalls => _selectedSalesmanCalls;
   bool get isLoading => _isLoading;
   FilterPeriod get selectedPeriod => _selectedPeriod;
   String? get currentBranch => _currentBranch;
 
-  Future<void> _init() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                   INIT                                 //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _init() async
+  {
     await _fetchCurrentBranch();
     if (_currentBranch != null) {
       await fetchSalesmen();
     } else {
       _isLoading = false;
       notifyListeners();
-      print("Warning: Could not fetch current user's branch code for salesman view.");
     }
   }
 
-  Future<void> _fetchCurrentBranch() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            FETCH BRANCH DATA                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _fetchCurrentBranch() async
+  {
     _currentBranch = await _authService.getUserBranch();
   }
 
-  Future<void> fetchSalesmen() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                           FETCH SALESMAN DATA                          //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> fetchSalesmen() async
+  {
     if (_currentBranch == null) {
-      print("Error: Current branch not set. Cannot fetch salesmen.");
+      _loader.showError("Error: Current branch not set. Cannot fetch salesmen.");
       return;
     }
 
@@ -60,7 +81,7 @@ class SalesmanCallViewModel extends ChangeNotifier {
           .where('branch', isEqualTo: _currentBranch)
           .get();
 
-      _salesmen = querySnapshot.docs.map((doc) => Rep.fromFirestore(doc)).toList();
+      _salesmen = querySnapshot.docs.map((doc) => Salesman.fromFirestore(doc)).toList();
       _salesmen.sort((a, b) => a.name.compareTo(b.name));
 
       if (_selectedSalesman == null || !_salesmen.any((salesman) => salesman.id == _selectedSalesman!.id)) {
@@ -76,7 +97,6 @@ class SalesmanCallViewModel extends ChangeNotifier {
       }
 
     } catch (e) {
-      print('Error fetching salesmen: $e');
       _salesmen = [];
       _selectedSalesman = null;
       _selectedSalesmanCalls = [];
@@ -86,7 +106,11 @@ class SalesmanCallViewModel extends ChangeNotifier {
     }
   }
 
-  void selectSalesman(Rep salesman) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                         SHOWING SALESMAN DATA                          //
+  ////////////////////////////////////////////////////////////////////////////
+  void selectSalesman(Salesman salesman)
+  {
     if (_selectedSalesman?.id != salesman.id) {
       _selectedSalesman = salesman;
       fetchCallsForSelectedSalesman(); // Call the public method
@@ -94,7 +118,11 @@ class SalesmanCallViewModel extends ChangeNotifier {
     }
   }
 
-  void setPeriod(FilterPeriod? newPeriod) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              FILTER PERIOD                             //
+  ////////////////////////////////////////////////////////////////////////////
+  void setPeriod(FilterPeriod? newPeriod)
+  {
     if (newPeriod != null && newPeriod != _selectedPeriod) {
       _selectedPeriod = newPeriod;
       fetchCallsForSelectedSalesman(); // Call the public method
@@ -102,18 +130,19 @@ class SalesmanCallViewModel extends ChangeNotifier {
     }
   }
 
-  // Public method to fetch calls for the selected salesman
-  Future<void> fetchCallsForSelectedSalesman() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                       CALLS FOR SELECTED SALESMAN                      //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> fetchCallsForSelectedSalesman() async
+  {
     if (_selectedSalesman == null) {
       _selectedSalesmanCalls = [];
       notifyListeners();
-      print('No salesman selected, calls list cleared.');
       return;
     }
 
     _isLoading = true;
     notifyListeners();
-    print('Fetching calls for salesman: ${_selectedSalesman!.name} (ID: ${_selectedSalesman!.id}) and period: ${_selectedPeriod.toDisplayString()}');
 
     try {
       DateTime endDate = DateTime.now();
@@ -144,8 +173,6 @@ class SalesmanCallViewModel extends ChangeNotifier {
       String startDateString = "${startDate.year}-${_twoDigits(startDate.month)}-${_twoDigits(startDate.day)}";
       String endDateString = "${endDate.year}-${_twoDigits(endDate.month)}-${_twoDigits(endDate.day)}";
 
-      print('Querying calls from $startDateString to $endDateString for user ID: ${_selectedSalesman!.id}');
-
       Query query = _firestore
           .collection('sales_man_calls')
           .where('user', isEqualTo: _selectedSalesman!.id)
@@ -156,31 +183,20 @@ class SalesmanCallViewModel extends ChangeNotifier {
 
       final querySnapshot = await query.get();
 
-      if (querySnapshot.docs.isEmpty) {
-        print('Firestore query returned 0 documents for user ID: ${_selectedSalesman!.id} and period $startDateString to $endDateString.');
-      } else {
-        print('Firestore query returned ${querySnapshot.docs.length} documents.');
-      }
-
       _selectedSalesmanCalls = querySnapshot.docs.map((doc) {
-        print('Processing document ID: ${doc.id}, Data: ${doc.data()}');
         try {
-          return SalesCall.fromFirestore(doc); // <--- IMPORTANT: Use SalesCall.fromFirestore
+          return SalesCall.fromFirestore(doc);
         } catch (e) {
-          print('ERROR: Failed to parse SalesCall document ID: ${doc.id}. Error: $e');
+          _loader.showError("Error parsing SalesCall document ID: ${doc.id}. Error: $e");
           return null;
         }
       }).where((call) => call != null).cast<SalesCall>().toList();
 
-      print('Successfully parsed ${_selectedSalesmanCalls.length} sales calls into the list.');
-
     } catch (e) {
-      print('GLOBAL ERROR: Error during sales call fetch operation: $e');
       _selectedSalesmanCalls = [];
     } finally {
       _isLoading = false;
       notifyListeners();
-      print('Finished fetchCallsForSelectedSalesman. Is loading: $_isLoading. Total calls in list: ${_selectedSalesmanCalls.length}');
     }
   }
 

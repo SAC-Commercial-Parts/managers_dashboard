@@ -13,19 +13,27 @@ class Sidebar extends StatelessWidget {
     required this.isMinimized,
   });
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return Container(
       width: isMinimized ? 60 : 240,
-      decoration: const BoxDecoration(
-        color: AppTheme.white,
-        border: Border(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: const Border(
           right: BorderSide(color: Colors.grey, width: 0.5),
         ),
       ),
       child: Column(
+        ////////////////////////////////////////////////////////////////////////////
+        //                               HYPERLINKS                               //
+        ////////////////////////////////////////////////////////////////////////////
         children: [
           if (!isMinimized)
+            // HEADING
             Container(
               padding: const EdgeInsets.all(16),
               child: const Text(
@@ -38,21 +46,29 @@ class Sidebar extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 16),
+
+          // DASHBOARD
           _buildMenuItem(
             icon: Icons.dashboard,
             title: 'Dashboard',
             index: 0,
           ),
+
+          // REPS
           _buildMenuItem(
             icon: Icons.people_alt,
             title: 'Reps',
             index: 1,
           ),
+
+          // SALESMAN & CALLS
           _buildMenuItem(
             icon: Icons.person,
             title: 'Salesmen & Calls',
             index: 2,
           ),
+
+          // QUOTES & INVOICES
           _buildMenuItem(
             icon: Icons.description,
             title: 'Quotes & Invoices',
@@ -64,11 +80,15 @@ class Sidebar extends StatelessWidget {
     );
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                MENU ITEM                               //
+  ////////////////////////////////////////////////////////////////////////////
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
     required int index,
-  }) {
+  })
+  {
     final isSelected = selectedIndex == index;
 
     return Container(
@@ -94,8 +114,8 @@ class Sidebar extends StatelessWidget {
         ),
         onTap: () => onItemTapped(index),
         contentPadding: EdgeInsets.symmetric(
-          horizontal: isMinimized ? 18 : 16,
-          vertical: 4,
+          horizontal: isMinimized ? 8 : 16,
+          vertical: isMinimized ? 8: 4,
         ),
       ),
     );

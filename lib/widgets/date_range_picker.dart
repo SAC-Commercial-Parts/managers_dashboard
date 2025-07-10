@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../core/app_theme.dart';
 
-class DateRangePicker extends StatelessWidget {
+////////////////////////////////////////////////////////////////////////////
+//                             DATE RANGE PICKER                          //
+////////////////////////////////////////////////////////////////////////////
+class DateRangePicker extends StatelessWidget
+{
   final DateTime startDate;
   final DateTime endDate;
   final Function(DateTime, DateTime) onDateRangeChanged;
@@ -14,8 +18,12 @@ class DateRangePicker extends StatelessWidget {
     required this.onDateRangeChanged,
   });
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -47,7 +55,11 @@ class DateRangePicker extends StatelessWidget {
     );
   }
 
-  Future<void> _showDateRangePicker(BuildContext context) async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            SHOW RANGE PICKER                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _showDateRangePicker(BuildContext context) async
+  {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),

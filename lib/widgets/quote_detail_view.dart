@@ -11,8 +11,12 @@ class QuoteDetailView extends StatelessWidget {
     required this.quote,
   });
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -21,26 +25,26 @@ class QuoteDetailView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // HEADER
             _buildHeader(),
             const SizedBox(height: 24),
 
-            // Client Information
+            // CLIENT INFORMATION
             _buildClientInfo(),
             const SizedBox(height: 24),
 
-            // Quote Details
+            // QUOTE DETAILS
             _buildQuoteDetails(),
             const SizedBox(height: 24),
 
-            // Items
+            // ITEMS
             _buildItemsList(),
             const SizedBox(height: 24),
 
-            // Total
+            // TOTAL
             _buildTotal(),
 
-            // Notes
+            // NOTES
             if (quote.notes != null) ...[
               const SizedBox(height: 24),
               _buildNotes(),
@@ -51,7 +55,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                   HEADER                               //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildHeader()
+  {
     return Row(
       children: [
         Container(
@@ -102,7 +110,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildClientInfo() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             CLIENT INFORMATION                         //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildClientInfo()
+  {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -130,7 +142,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildQuoteDetails() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               QUOTE DETAILS                            //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildQuoteDetails()
+  {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -162,7 +178,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildItemsList() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                 ITEM LIST                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildItemsList()
+  {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,7 +246,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildTotal() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                   TOTAL                                //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildTotal()
+  {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -258,7 +282,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildNotes() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                   NOTES                                //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildNotes()
+  {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -290,7 +318,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                INFOR ROW                               //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildInfoRow(IconData icon, String label, String value)
+  {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -316,7 +348,11 @@ class QuoteDetailView extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(QuoteStatus status) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               STATUS COLOR                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Color _getStatusColor(QuoteStatus status)
+  {
     switch (status) {
       case QuoteStatus.pending:
         return Colors.orange;
@@ -329,7 +365,11 @@ class QuoteDetailView extends StatelessWidget {
     }
   }
 
-  String _getStatusText(QuoteStatus status) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               STATUS TEXT                              //
+  ////////////////////////////////////////////////////////////////////////////
+  String _getStatusText(QuoteStatus status)
+  {
     switch (status) {
       case QuoteStatus.pending:
         return 'Pending';

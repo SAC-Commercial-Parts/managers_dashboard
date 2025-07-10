@@ -9,78 +9,116 @@ import '../widgets/sidebar.dart';
 import 'dashboard_view.dart';
 import 'employees_view.dart';
 import 'quotes_invoices_view.dart';
-import 'package:branch_managers_app/views/login_view.dart'; // Ensure correct path for LoginView
+import 'package:branch_managers_app/views/login_view.dart';
 
-class MainScreen extends StatefulWidget {
+////////////////////////////////////////////////////////////////////////////
+//                                   CLASS                                //
+////////////////////////////////////////////////////////////////////////////
+class MainScreen extends StatefulWidget
+{
+  static const id = '/home';
   const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+////////////////////////////////////////////////////////////////////////////
+//                               STATE CLASS                              //
+////////////////////////////////////////////////////////////////////////////
+class _MainScreenState extends State<MainScreen>
+{
+  int _selectedIndex = 1;
   bool _sidebarMinimized = false;
   String? _userBranchCode; // To store fetched branchCode
   String? _userName; // To store fetched user name
 
-  final List<Widget> _views = [
+  ////////////////////////////////////////////////////////////////////////////
+  //                                VIEWS LIST                              //
+  ////////////////////////////////////////////////////////////////////////////
+  final List<Widget> _views =
+  [
     const DashboardView(),
     const VisitsView(),
     const SalesmanCallView(),
     const QuotesInvoicesView(),
   ];
 
-  final List<String> _titles = [
+  ////////////////////////////////////////////////////////////////////////////
+  //                               VIEW TITLES                              //
+  ////////////////////////////////////////////////////////////////////////////
+  final List<String> _titles =
+  [
     'Dashboard',
     'Reps',
     'Salesmen & Calls',
     'Quotes & Invoices',
   ];
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                               INIT STATE                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  void initState() {
+  void initState()
+  {
     super.initState();
-    // Fetch user details immediately when the screen loads
     _fetchUserDetails();
   }
 
-  // Method to fetch user details from Firestore
-  Future<void> _fetchUserDetails() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                         FIRESTORE USER DETAILS                         //
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _fetchUserDetails() async
+  {
     final authService = Provider.of<AuthService>(context, listen: false);
     final currentUser = authService.currentUser;
 
     if (currentUser != null) {
       _userName = currentUser.displayName ?? currentUser.email?.split('@')[0];
 
-      // Fetch branch code from Firestore using the existing method
       _userBranchCode = await authService.getUserBranch();
 
-      setState(() {
-        // Update state to rebuild UI with fetched details
-      });
+      // setState(() {
+      // });
     }
   }
 
-  void _onItemTapped(int index) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             SELECTING ITEM                             //
+  ////////////////////////////////////////////////////////////////////////////
+  void _onItemTapped(int index)
+  {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  void _toggleSidebar() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             SIDEBAR TOGGLE                             //
+  ////////////////////////////////////////////////////////////////////////////
+  void _toggleSidebar()
+  {
     setState(() {
       _sidebarMinimized = !_sidebarMinimized;
     });
   }
 
-  void _logout() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                  LOGOUT                                //
+  ////////////////////////////////////////////////////////////////////////////
+  void _logout() async
+  {
     final authService = Provider.of<AuthService>(context, listen: false);
     await authService.signOut();
   }
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     final user = context.watch<User?>();
     if (user == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -97,6 +135,9 @@ class _MainScreenState extends State<MainScreen> {
     final String displayUserEmail = user.email ?? 'N/A';
 
     return Scaffold(
+      ////////////////////////////////////////////////////////////////////////////
+      //                                 APP BAR                                //
+      ////////////////////////////////////////////////////////////////////////////
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,6 +168,9 @@ class _MainScreenState extends State<MainScreen> {
               }
             },
             itemBuilder: (context) => [
+              ////////////////////////////////////////////////////////////////////////////
+              //                               USER DETAILS                             //
+              ////////////////////////////////////////////////////////////////////////////
               PopupMenuItem(
                 enabled: false,
                 child: Column(
@@ -148,7 +192,10 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               const PopupMenuDivider(),
-              // START OF THE ONLY CHANGE: ADD THEME TOGGLE
+
+              ////////////////////////////////////////////////////////////////////////////
+              //                               THEME TOGGLE                             //
+              ////////////////////////////////////////////////////////////////////////////
               PopupMenuItem(
                 enabled: false, // Make it not selectable itself, just its content
                 padding: EdgeInsets.zero, // Remove default padding for better control
@@ -182,7 +229,9 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               const PopupMenuDivider(),
-              // END OF THE ONLY CHANGE
+              ////////////////////////////////////////////////////////////////////////////
+              //                               LOGOUT BUTTON                            //
+              ////////////////////////////////////////////////////////////////////////////
               const PopupMenuItem(
                 value: 'logout',
                 child: Row(
@@ -197,6 +246,10 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
+
+      ////////////////////////////////////////////////////////////////////////////
+      //                           APP DRAWER[MOBILE]                           //
+      ////////////////////////////////////////////////////////////////////////////
       drawer: ResponsiveLayout.isMobile(context)
           ? Sidebar(
         selectedIndex: _selectedIndex,

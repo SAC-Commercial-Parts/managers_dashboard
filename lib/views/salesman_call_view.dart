@@ -9,11 +9,16 @@ import '../widgets/salesman_details_and_calls_report.dart'; // Import the new re
 import '../widgets/filter_dropdown.dart';
 
 class SalesmanCallView extends StatelessWidget {
+  static const id = '/salesman_calls';
   const SalesmanCallView({super.key});
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
-    return Consumer<SalesmanCallViewModel>( // Use SalesmanCallViewModel
+  Widget build(BuildContext context)
+  {
+    return Consumer<SalesmanCallViewModel>(
       builder: (context, viewModel, child) {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -29,6 +34,9 @@ class SalesmanCallView extends StatelessWidget {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          ////////////////////////////////////////////////////////////////////////////
+                          //                                   HEADING                              //
+                          ////////////////////////////////////////////////////////////////////////////
                           children: [
                             Text(
                               'Branch ${viewModel.currentBranch ?? "..."} Salesmen',
@@ -50,6 +58,7 @@ class SalesmanCallView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
+                      // DATE FILTER
                       SizedBox(
                         width: 200,
                         child: FilterDropdown(
@@ -63,6 +72,7 @@ class SalesmanCallView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
+              // LOADING INDICATOR
               if (viewModel.isLoading && viewModel.salesmen.isEmpty)
                 const Center(
                   child: Padding(
@@ -71,6 +81,10 @@ class SalesmanCallView extends StatelessWidget {
                   ),
                 )
               else
+
+              ////////////////////////////////////////////////////////////////////////////
+              //                                 MAIN LIST                              //
+              ////////////////////////////////////////////////////////////////////////////
                 SizedBox(
                   height: MediaQuery.of(context).size.height - 200 -
                       MediaQuery.of(context).padding.top -
@@ -107,7 +121,11 @@ class SalesmanCallView extends StatelessWidget {
     );
   }
 
-  Widget _buildSalesmenList(SalesmanCallViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              SALESMAN LIST                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildSalesmenList(SalesmanCallViewModel viewModel)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -116,6 +134,9 @@ class SalesmanCallView extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
+            ////////////////////////////////////////////////////////////////////////////
+            //                                   HEADER                               //
+            ////////////////////////////////////////////////////////////////////////////
             child: Row(
               children: [
                 const Icon(
@@ -135,9 +156,12 @@ class SalesmanCallView extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
+
+
           Expanded(
             child: viewModel.salesmen.isEmpty
                 ? Center(
+              // NO LIST
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -165,6 +189,8 @@ class SalesmanCallView extends StatelessWidget {
                 ],
               ),
             )
+
+            // MAIN LIST
                 : ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: viewModel.salesmen.length,

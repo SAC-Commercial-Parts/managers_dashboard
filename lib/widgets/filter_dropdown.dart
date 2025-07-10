@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/performance_data.dart'; // Import the new enum
 
-class FilterDropdown extends StatelessWidget {
-  final FilterPeriod value; // Changed type to FilterPeriod
-  final ValueChanged<FilterPeriod?> onChanged; // Changed type to FilterPeriod?
+////////////////////////////////////////////////////////////////////////////
+//                            FILTER DROPDOWN                             //
+////////////////////////////////////////////////////////////////////////////
+class FilterDropdown extends StatelessWidget
+{
+  final FilterPeriod value;
+  final ValueChanged<FilterPeriod?> onChanged;
 
   const FilterDropdown({
     super.key,
@@ -11,8 +15,12 @@ class FilterDropdown extends StatelessWidget {
     required this.onChanged,
   });
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return DropdownButtonFormField<FilterPeriod>( // Changed type to FilterPeriod
       value: value,
       onChanged: onChanged,

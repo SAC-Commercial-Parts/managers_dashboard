@@ -30,6 +30,9 @@ class DefaultFirebaseOptions {
     }
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                  WEBSITE                               //
+  ////////////////////////////////////////////////////////////////////////////
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCHJOtE-GLrciYAiGf6mY2pWOy2fVKwKp0',
     appId: '1:912272776985:web:8c4ea1c0acc0e7fa6b2f88',
@@ -41,6 +44,9 @@ class DefaultFirebaseOptions {
     measurementId: 'G-17E5XNXZ41',
   );
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                  ANDROID                               //
+  ////////////////////////////////////////////////////////////////////////////
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyATyiQwm4qcOpAV3WkYyvEEu_uoAQcfB9I',
     appId: '1:912272776985:android:4130cdac9f84744b6b2f88',
@@ -50,6 +56,9 @@ class DefaultFirebaseOptions {
     storageBucket: 'repmobileapp-1a74a.appspot.com',
   );
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                    IOS                                 //
+  ////////////////////////////////////////////////////////////////////////////
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAkyVt8eIJuzSEVDluMaHcFwrUMpBdDqjY',
     appId: '1:912272776985:ios:2ce190714d33ace26b2f88',
@@ -60,6 +69,9 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.managersDashboard',
   );
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                  MAC OS                                //
+  ////////////////////////////////////////////////////////////////////////////
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAkyVt8eIJuzSEVDluMaHcFwrUMpBdDqjY',
     appId: '1:912272776985:ios:2ce190714d33ace26b2f88',
@@ -70,6 +82,9 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.managersDashboard',
   );
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                  WINDOWS                               //
+  ////////////////////////////////////////////////////////////////////////////
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyCHJOtE-GLrciYAiGf6mY2pWOy2fVKwKp0',
     appId: '1:912272776985:web:ddc34f48c7bf05c36b2f88',

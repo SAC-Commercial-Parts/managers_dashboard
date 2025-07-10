@@ -1,54 +1,123 @@
-// lib/services/auth_wrapper.dart
-
+import 'package:branch_managers_app/views/login_view.dart';
+import 'package:branch_managers_app/views/main_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart'; // No longer strictly needed for AuthWrapper's core logic
-import 'package:firebase_auth/firebase_auth.dart'; // <--- IMPORTANT: Import Firebase's User type
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../views/login_view.dart';
-import '../views/main_screen.dart';
+import 'auth_service.dart';
 
-/// A widget that handles authentication state and navigates accordingly using a StreamBuilder.
 class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
+  final FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firebaseFirestore;
+  final AuthService authService;
+
+  const AuthWrapper({
+    super.key,
+    required this.firebaseAuth,
+    required this.firebaseFirestore,
+    required this.authService,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // StreamBuilder listens directly to the FirebaseAuth's authentication state changes.
-    // This stream emits a new User object (or null) whenever the user's sign-in state changes,
-    // including the initial check when the app starts.
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(), // Direct stream from Firebase Auth
+      stream: firebaseAuth.authStateChanges(),
       builder: (context, snapshot) {
-        // Step 1: Check the connection state of the stream.
-        // During app startup, Firebase needs time to check cached credentials.
-        // In this phase, connectionState will be ConnectionState.waiting.
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // While waiting for the auth state to resolve, show a loading indicator.
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(), // You can customize your loading spinner
-            ),
-          );
-        } else if (snapshot.hasError) {
-          // Step 2: Handle any errors that might occur during the stream's lifecycle.
-          return Scaffold(
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
+          return _buildLoadingScreen();
+        }
+
+        if (snapshot.hasError) {
+          return _buildErrorScreen(snapshot.error);
+        }
+
+        if (snapshot.hasData && snapshot.data != null) {
+          final User user = snapshot.data!;
+
+          // Get user document based on 'id' field matching Firebase UID
+          return FutureBuilder<QuerySnapshot>(
+            future: firebaseFirestore
+                .collection('user_details')
+                .where('id', isEqualTo: user.uid)
+                .limit(1)
+                .get(),
+            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> userQuerySnapshot) {
+              if (userQuerySnapshot.connectionState == ConnectionState.waiting) {
+                return _buildLoadingScreen(message: 'Checking User Details...');
+              } else if (userQuerySnapshot.hasError) {
+                return _buildErrorScreen(userQuerySnapshot.error);
+              } else if (userQuerySnapshot.hasData && userQuerySnapshot.data!.docs.isNotEmpty) {
+                final userData = userQuerySnapshot.data!.docs.first.data() as Map<String, dynamic>?;
+
+                if (userData != null && userData['isApproved'] == true) {
+                  return FutureBuilder<bool>(
+                    future: authService.isCurrentUserAdmin(),
+                    builder: (BuildContext context, AsyncSnapshot<bool> managerSnapshot) {
+                      if (managerSnapshot.connectionState == ConnectionState.waiting) {
+                        return _buildLoadingScreen(message: 'Checking Manager Status...');
+                      } else if (managerSnapshot.hasError) {
+                        return _buildErrorScreen(managerSnapshot.error);
+                      } else if (managerSnapshot.data == true) {
+                        return const MainScreen();
+                      } else {
+                        return const LoginView();
+                      }
+                    },
+                  );
+                } else {
+                  return _buildErrorScreen('error');
+                }
+              } else {
+                return const LoginView(); // no user document found
+              }
+            },
           );
         } else {
-          // Step 3: ConnectionState is active (or done), meaning Firebase has resolved the auth state.
-          final User? user = snapshot.data; // Get the user object from the snapshot
-
-          // If the user object is null, it means no user is currently logged in.
-          if (user == null) {
-            return const LoginView();
-          } else {
-            // If the user object is not null, a user is logged in.
-            return const MainScreen();
-          }
+          return const LoginView(); // not logged in
         }
       },
     );
   }
+
+  Widget _buildLoadingScreen({String message = 'Loading...'}) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Hero(
+                tag: 'logo',
+                child: SizedBox(
+                  height: 150.0,
+                  child: Image.asset('images/logo.png'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32.0),
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
+            ),
+            const SizedBox(height: 16.0),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.black54, fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen(Object? error) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Text('Error: $error', style: const TextStyle(color: Colors.red)),
+      ),
+    );
+  }
 }
+
+

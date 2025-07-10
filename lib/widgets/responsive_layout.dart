@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
 
-class ResponsiveLayout {
+////////////////////////////////////////////////////////////////////////////
+//                             RESPONSIVENESS                             //
+////////////////////////////////////////////////////////////////////////////
+class ResponsiveLayout
+{
   static const double mobileBreakpoint = 768;
   static const double tabletBreakpoint = 1024;
 
-  static bool isMobile(BuildContext context) {
+  // MOBILE
+  static bool isMobile(BuildContext context)
+  {
     return MediaQuery.of(context).size.width < mobileBreakpoint;
   }
 
-  static bool isTablet(BuildContext context) {
+  // TABLET
+  static bool isTablet(BuildContext context)
+  {
     final width = MediaQuery.of(context).size.width;
     return width >= mobileBreakpoint && width < tabletBreakpoint;
   }
 
-  static bool isDesktop(BuildContext context) {
+  // DESKTOP
+  static bool isDesktop(BuildContext context)
+  {
     return MediaQuery.of(context).size.width >= tabletBreakpoint;
   }
 }

@@ -1,3 +1,5 @@
+// lib/models/performance_data.dart
+
 class PerformanceData {
   final String employeeId;
   final DateTime date;
@@ -35,6 +37,9 @@ enum FilterPeriod {
   currentYear,
 }
 
+////////////////////////////////////////////////////////////////////////////
+//                         FILTER BY DATE RANGE                           //
+////////////////////////////////////////////////////////////////////////////
 extension FilterPeriodExtension on FilterPeriod {
   String toDisplayString() {
     switch (this) {

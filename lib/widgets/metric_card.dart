@@ -14,8 +14,12 @@ class MetricCard extends StatelessWidget {
     required this.color,
   });
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -39,6 +43,7 @@ class MetricCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // TITLE
                   Text(
                     title,
                     style: const TextStyle(
@@ -47,6 +52,8 @@ class MetricCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
+
+                  // VALUE
                   Text(
                     value,
                     style: const TextStyle(

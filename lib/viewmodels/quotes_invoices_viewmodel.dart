@@ -6,8 +6,12 @@ import '../models/invoice.dart';
 import '../services/quotes_invoice_service.dart';
 import '../services/auth_service.dart';
 
-class QuotesInvoicesViewModel extends ChangeNotifier {
-  final AuthService _authService; // Declare a final field for AuthService
+////////////////////////////////////////////////////////////////////////////
+//                       QUOTES/INVOICE VIEWMODEL                         //
+////////////////////////////////////////////////////////////////////////////
+class QuotesInvoicesViewModel extends ChangeNotifier
+{
+  final AuthService _authService;
 
   List<Quote> _quotes = [];
   List<Invoice> _invoices = [];
@@ -27,8 +31,6 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   int get selectedTabIndex => _selectedTabIndex;
 
-  // Use the injected _authService instance to get the current branch
-  // This will assume _userBranch is populated correctly in the constructor
   String? _userBranch; // Private variable to store fetched branch
 
   String get currentBranch => _userBranch ?? '';
@@ -41,54 +43,84 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
   List<Invoice> get paidInvoices => _invoices.where((i) => i.status == InvoiceStatus.paid).toList();
   List<Invoice> get creditedInvoices => _invoices.where((i) => i.isCredited).toList();
 
-
-  // Constructor now requires AuthService
-  QuotesInvoicesViewModel(this._authService) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                CONSTRUCTOR                             //
+  ////////////////////////////////////////////////////////////////////////////
+  QuotesInvoicesViewModel(this._authService)
+  {
     _loadInitialData(); // Call a new method to load initial data including user details
   }
 
-  void _loadInitialData() async {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               INITIAL DATA                             //
+  ////////////////////////////////////////////////////////////////////////////
+  void _loadInitialData() async
+  {
     // Fetch the user's branch initially
     if (_authService.currentUser != null) {
       _userBranch = await _authService.getUserBranch();
-      notifyListeners(); // Notify if branch is loaded before data
+      notifyListeners();
     }
-    _loadData(); // Then load quotes and invoices
+    _loadData();
   }
 
-  void setTabIndex(int index) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                TAB INDEX                               //
+  ////////////////////////////////////////////////////////////////////////////
+  void setTabIndex(int index)
+  {
     _selectedTabIndex = index;
     _selectedQuote = null;
     _selectedInvoice = null;
     notifyListeners();
   }
 
-  void setDateRange(DateTime start, DateTime end) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            DATE RANGE FILTER                           //
+  ////////////////////////////////////////////////////////////////////////////
+  void setDateRange(DateTime start, DateTime end)
+  {
     _startDate = start;
     _endDate = end;
     _loadData();
     notifyListeners();
   }
 
-  void selectQuote(Quote quote) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                           SHOWING QUOTE DETAIL                         //
+  ////////////////////////////////////////////////////////////////////////////
+  void selectQuote(Quote quote)
+  {
     _selectedQuote = quote;
     _selectedInvoice = null;
     notifyListeners();
   }
 
-  void selectInvoice(Invoice invoice) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                           SHOWING INVOICE DATA                         //
+  ////////////////////////////////////////////////////////////////////////////
+  void selectInvoice(Invoice invoice)
+  {
     _selectedInvoice = invoice;
     _selectedQuote = null;
     notifyListeners();
   }
 
-  void clearSelection() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                  CLEAR                                 //
+  ////////////////////////////////////////////////////////////////////////////
+  void clearSelection()
+  {
     _selectedQuote = null;
     _selectedInvoice = null;
     notifyListeners();
   }
 
-  void _loadData() async { // Made async to await branch
+  ////////////////////////////////////////////////////////////////////////////
+  //                                LOAD DATA                               //
+  ////////////////////////////////////////////////////////////////////////////
+  void _loadData() async
+  {
     if (_authService.currentUser == null) {
       _quotes = [];
       _invoices = [];
@@ -104,7 +136,6 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
     if (_userBranch == null) {
       _userBranch = await _authService.getUserBranch();
       if (_userBranch == null) {
-        print("Error: Could not determine user branch for quotes/invoices.");
         _isLoading = false;
         notifyListeners();
         return;
@@ -129,13 +160,16 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
       notifyListeners();
     });
   }
-
-  void refresh() {
+  void refresh()
+  {
     _loadData();
   }
 
-  // Statistics
-  Map<String, dynamic> get quotesStats {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               STATISTICS                               //
+  ////////////////////////////////////////////////////////////////////////////
+  Map<String, dynamic> get quotesStats
+  {
     final total = _quotes.length;
     final pending = _quotes.where((q) => q.status == QuoteStatus.pending).length;
     final converted = _quotes.where((q) => q.status == QuoteStatus.converted).length;
@@ -151,8 +185,8 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
       'conversionRate': total > 0 ? (converted / total * 100) : 0.0,
     };
   }
-
-  Map<String, dynamic> get invoicesStats {
+  Map<String, dynamic> get invoicesStats
+  {
     final total = _invoices.length;
     final paid = _invoices.where((i) => i.status == InvoiceStatus.paid && !i.isCredited).length;
     final overdue = _invoices.where((i) => i.status == InvoiceStatus.overdue && !i.isCredited).length;
@@ -171,9 +205,8 @@ class QuotesInvoicesViewModel extends ChangeNotifier {
       'paymentRate': total > 0 ? (paid / total * 100) : 0.0,
     };
   }
-
-  // New getter for Credit stats (if needed, otherwise invoicesStats can be adapted)
-  Map<String, dynamic> get creditStats {
+  Map<String, dynamic> get creditStats
+  {
     final totalCredited = _invoices.where((i) => i.isCredited).length;
     final totalCreditedValue = _invoices.where((i) => i.isCredited).fold(0.0, (sum, i) => sum + i.totalAmount);
 

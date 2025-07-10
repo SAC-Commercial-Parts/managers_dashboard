@@ -7,32 +7,50 @@ import '../../models/sales_call.dart';
 import '../../services/auth_service.dart';
 import '../../viewmodels/manager_sales_call_log_viewmodel.dart';
 
-class ManagerSalesCallLogScreen extends StatelessWidget {
+////////////////////////////////////////////////////////////////////////////
+//                        MANAGERS CALL LOG SCREEN                        //
+////////////////////////////////////////////////////////////////////////////
+// FOR SALESMEN
+class ManagerSalesCallLogScreen extends StatelessWidget
+{
   final SalesCall salesCall; // Now takes a SalesCall object
 
   const ManagerSalesCallLogScreen({super.key, required this.salesCall});
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return ChangeNotifierProvider(
       create: (context) => ManagerSalesCallLogViewModel(salesCall, Provider.of<AuthService>(context, listen: false)),
       child: Consumer<ManagerSalesCallLogViewModel>(
         builder: (context, viewModel, child) {
           return Scaffold(
+            ////////////////////////////////////////////////////////////////////////////
+            //                                 APP BAR                                //
+            ////////////////////////////////////////////////////////////////////////////
             appBar: AppBar(
               title: Text('Log Call for ${salesCall.clientName}'),
               backgroundColor: AppTheme.primaryRed,
               foregroundColor: Colors.white,
             ),
+            ////////////////////////////////////////////////////////////////////////////
+            //                                MAIN DATA                               //
+            ////////////////////////////////////////////////////////////////////////////
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // CALL DETAILS
                   _buildSalesCallDetailsCard(context, salesCall),
                   const SizedBox(height: 20),
+                  // MANAGER FEEDBACK
                   _buildManagerFeedbackSection(context, viewModel),
                   const SizedBox(height: 20),
+                  // CALL LOG BUTTONS
                   _buildCallLogButtons(context, viewModel),
                 ],
               ),
@@ -43,7 +61,11 @@ class ManagerSalesCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSalesCallDetailsCard(BuildContext context, SalesCall salesCall) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                           CALL DETAILS CARD                            //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildSalesCallDetailsCard(BuildContext context, SalesCall salesCall)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -61,7 +83,7 @@ class ManagerSalesCallLogScreen extends StatelessWidget {
             _detailRow('Account No:', salesCall.clientAccountNumber),
             _detailRow('Call Date:', salesCall.callDate),
             _detailRow('Call Window:', '${salesCall.callWindowOpened} - ${salesCall.callWindowClosed}'),
-            _detailRow('Salesman Spoke To:', salesCall.spokeTo),
+            _detailRow('Salesman Spoke To:', salesCall.spokeTo!),
             _detailRow('Salesman Feedback:', salesCall.salesmanFeedback ?? 'N/A'),
             _detailRow('Client Feedback:', salesCall.clientFeedback ?? 'N/A'),
             _detailRow('Call Postponed:', salesCall.callWasPostponed ? 'Yes' : 'No'),
@@ -72,7 +94,11 @@ class ManagerSalesCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _detailRow(String label, String value) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                DETAILS ROW                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _detailRow(String label, String value)
+  {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -96,7 +122,11 @@ class ManagerSalesCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildManagerFeedbackSection(BuildContext context, ManagerSalesCallLogViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             FEEDBACK SECTION                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildManagerFeedbackSection(BuildContext context, ManagerSalesCallLogViewModel viewModel)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -212,9 +242,16 @@ class ManagerSalesCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCallLogButtons(BuildContext context, ManagerSalesCallLogViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             CALL LOG BUTTONS                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildCallLogButtons(BuildContext context, ManagerSalesCallLogViewModel viewModel)
+  {
     return Row(
       children: [
+        ////////////////////////////////////////////////////////////////////////////
+        //                                LOG CALL                                //
+        ////////////////////////////////////////////////////////////////////////////
         Expanded(
           child: ElevatedButton.icon(
             onPressed: viewModel.isLoading || !viewModel.canLogCall
@@ -248,7 +285,12 @@ class ManagerSalesCallLogScreen extends StatelessWidget {
             ),
           ),
         ),
+
         const SizedBox(width: 10),
+
+        ////////////////////////////////////////////////////////////////////////////
+        //                             CALL UNANSWERED                            //
+        ////////////////////////////////////////////////////////////////////////////
         Expanded(
           child: ElevatedButton.icon(
             onPressed: viewModel.isLoading || !viewModel.canLogUnansweredCall
@@ -286,7 +328,11 @@ class ManagerSalesCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingSpinner() {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             LOADING SPINNER                            //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildLoadingSpinner()
+  {
     return const SizedBox(
       width: 20,
       height: 20,

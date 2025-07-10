@@ -1,7 +1,10 @@
 // lib/models/invoice.dart
 
 enum InvoiceStatus { draft, sent, paid, overdue, cancelled }
-
+////////////////////////////////////////////////////////////////////////////
+//                             INVOICE MODEL                              //
+////////////////////////////////////////////////////////////////////////////
+// TO BE AMENDED [THIS WAS FOR MOCK DATA]
 class Invoice {
   final String id;
   final String quoteId;
@@ -100,6 +103,10 @@ class Invoice {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////
+//                           INVOICE ITEM MODEL                           //
+////////////////////////////////////////////////////////////////////////////
+// TO BE AMENDED [THIS WAS FOR MOCK DATA]
 class InvoiceItem {
   final String id;
   final String description;

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+////////////////////////////////////////////////////////////////////////////
+//                                APP THEME                              //
+////////////////////////////////////////////////////////////////////////////
 class AppTheme {
   // Common Colors (can be used by both themes or adjusted for dark)
   static const Color primaryRed = Color(0xFFDC2626);
@@ -8,16 +11,18 @@ class AppTheme {
   static const Color white = Color(0xFFFFFFFF);
 
   // Light Theme Specific Colors
-  static const Color lightGray = Color(0xFFF5F5F5); // Background
-  static const Color darkGray = Color(0xFF374151); // Text/Icons on light background
+  static const Color lightGray = Color(0xFFF5F5F5);
+  static const Color darkGray = Color(0xFF374151);
 
   // Dark Theme Specific Colors
-  static const Color darkBackground = Color(0xFF121212); // Primary dark background
-  static const Color darkSurface = Color(0xFF1E1E1E);    // Card/dialog/sheet background
-  static const Color lightText = Color(0xFFE0E0E0);      // Text/Icons on dark background
-  static const Color mediumGray = Color(0xFFBBBBBB);    // Secondary text/icons on dark background
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1D1616);
+  static const Color lightText = Color(0xFFE0E0E0);
+  static const Color mediumGray = Color(0xFFBBBBBB);
 
-  // Light Theme
+  ////////////////////////////////////////////////////////////////////////////
+  //                              LIGHT THEME                               //
+  ////////////////////////////////////////////////////////////////////////////
   static ThemeData get lightTheme {
     return ThemeData(
       brightness: Brightness.light, // Explicitly declare brightness
@@ -83,7 +88,9 @@ class AppTheme {
     );
   }
 
-  // Dark Theme
+  ////////////////////////////////////////////////////////////////////////////
+  //                               DARK THEME                               //
+  ////////////////////////////////////////////////////////////////////////////
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark, // Explicitly declare brightness
@@ -92,16 +99,16 @@ class AppTheme {
       canvasColor: darkBackground, // Used by Drawer, etc.
       scaffoldBackgroundColor: darkBackground,
       appBarTheme: const AppBarTheme(
-        backgroundColor: darkSurface, // Darker background for app bar
-        foregroundColor: lightText,   // Light text on dark app bar
+        backgroundColor: primaryRed,
+        foregroundColor: white,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          color: lightText,
+          color: white,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
-        iconTheme: IconThemeData(color: lightText), // Icons visible on dark app bar
+        iconTheme: IconThemeData(color: white), // Ensure icons are visible
       ),
       cardTheme: CardThemeData(
         color: darkSurface, // Cards are dark in dark mode

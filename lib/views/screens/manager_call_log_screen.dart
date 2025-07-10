@@ -7,35 +7,57 @@ import '../../models/visit.dart';
 import '../../services/auth_service.dart';
 import '../../viewmodels/manager_call_log_viewmodel.dart';
 
-class ManagerCallLogScreen extends StatelessWidget {
+////////////////////////////////////////////////////////////////////////////
+//                         MANAGERS CALL LOG SCREEN                       //
+////////////////////////////////////////////////////////////////////////////
+// FOR REPS
+class ManagerCallLogScreen extends StatelessWidget
+{
   final Visit visit;
 
   const ManagerCallLogScreen({super.key, required this.visit});
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return ChangeNotifierProvider(
       create: (context) => ManagerCallLogViewModel(visit, Provider.of<AuthService>(context, listen: false)),
       child: Consumer<ManagerCallLogViewModel>(
         builder: (context, viewModel, child) {
           return Scaffold(
+            ////////////////////////////////////////////////////////////////////////////
+            //                                  APP BAR                               //
+            ////////////////////////////////////////////////////////////////////////////
             appBar: AppBar(
               title: Text('Log Call for ${visit.clientName}'),
               backgroundColor: AppTheme.primaryRed,
               foregroundColor: Colors.white,
             ),
+
+            ////////////////////////////////////////////////////////////////////////////
+            //                                 MAIN DATA                              //
+            ////////////////////////////////////////////////////////////////////////////
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // DEATAILS ABOUT VISIT
                   _buildVisitDetailsCard(context, visit),
                   const SizedBox(height: 20),
+
                   if (viewModel.salesmanCallHistoryExists) // Display salesman call history if found
                     _buildSalesmanCallHistoryWarning(context, viewModel),
                   const SizedBox(height: 20),
+
+                  // MANAGERS FEEDBACK
                   _buildManagerFeedbackSection(context, viewModel),
                   const SizedBox(height: 20),
+
+                  // CALL LOG BUTTONS
                   _buildCallLogButtons(context, viewModel), // Renamed for multiple buttons
                 ],
               ),
@@ -46,7 +68,11 @@ class ManagerCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVisitDetailsCard(BuildContext context, Visit visit) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               VISIT DETAILS                            //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildVisitDetailsCard(BuildContext context, Visit visit)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -90,7 +116,11 @@ class ManagerCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _detailRow(String label, String value) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                               DETAILS ROW                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _detailRow(String label, String value)
+  {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -114,7 +144,11 @@ class ManagerCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSalesmanCallHistoryWarning(BuildContext context, ManagerCallLogViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                       SALESMAN CALL HISTORY FLAG                       //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildSalesmanCallHistoryWarning(BuildContext context, ManagerCallLogViewModel viewModel)
+  {
     return Card(
       color: Colors.yellow.shade100,
       elevation: 2,
@@ -150,8 +184,11 @@ class ManagerCallLogScreen extends StatelessWidget {
     );
   }
 
-
-  Widget _buildManagerFeedbackSection(BuildContext context, ManagerCallLogViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             FEEDBACK SECTION                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildManagerFeedbackSection(BuildContext context, ManagerCallLogViewModel viewModel)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -267,9 +304,16 @@ class ManagerCallLogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCallLogButtons(BuildContext context, ManagerCallLogViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             CALL LOG BUTTONS                           //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildCallLogButtons(BuildContext context, ManagerCallLogViewModel viewModel)
+  {
     return Row(
       children: [
+        ////////////////////////////////////////////////////////////////////////////
+        //                                 LOG CALL                               //
+        ////////////////////////////////////////////////////////////////////////////
         Expanded(
           child: ElevatedButton.icon(
             onPressed: viewModel.isLoading || !viewModel.canLogCall
@@ -304,7 +348,11 @@ class ManagerCallLogScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 10), // Space between buttons
+
+        const SizedBox(width: 10),
+        ////////////////////////////////////////////////////////////////////////////
+        //                            UNANSWERED CALL                             //
+        ////////////////////////////////////////////////////////////////////////////
         Expanded(
           child: ElevatedButton.icon(
             onPressed: viewModel.isLoading || !viewModel.canLogUnansweredCall
@@ -342,6 +390,9 @@ class ManagerCallLogScreen extends StatelessWidget {
     );
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                             LOADING SPINNER                            //
+  ////////////////////////////////////////////////////////////////////////////
   Widget _buildLoadingSpinner() {
     return const SizedBox(
       width: 20,

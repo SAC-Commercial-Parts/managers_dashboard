@@ -12,10 +12,15 @@ import '../widgets/invoice_detail_view.dart';
 import '../widgets/date_range_picker.dart';
 
 class QuotesInvoicesView extends StatelessWidget {
+  static const id = '/quotes_and_invoices';
   const QuotesInvoicesView({super.key});
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return Consumer<QuotesInvoicesViewModel>(
       builder: (context, viewModel, child) {
         return SingleChildScrollView(
@@ -23,16 +28,23 @@ class QuotesInvoicesView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section
+              ////////////////////////////////////////////////////////////////////////////
+              //                              HEADER SECTION                            //
+              ////////////////////////////////////////////////////////////////////////////
               _buildHeaderSection(context, viewModel),
               const SizedBox(height: 24),
 
-              // Stats Cards
+              ////////////////////////////////////////////////////////////////////////////
+              //                            STATS CARD SECTION                          //
+              ////////////////////////////////////////////////////////////////////////////
               _buildStatsSection(viewModel),
               const SizedBox(height: 24),
 
-              // Content Section
+              ////////////////////////////////////////////////////////////////////////////
+              //                                MAIN DATA                               //
+              ////////////////////////////////////////////////////////////////////////////
               if (viewModel.isLoading)
+                // LOADING INDICATOR
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(48.0),
@@ -40,6 +52,9 @@ class QuotesInvoicesView extends StatelessWidget {
                   ),
                 )
               else
+              ////////////////////////////////////////////////////////////////////////////
+              //                       QUOTES/INVOICE/CREDITS LIST                      //
+              ////////////////////////////////////////////////////////////////////////////
                 SizedBox(
                   height: MediaQuery.of(context).size.height - 300,
                   child: Row(
@@ -66,7 +81,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderSection(BuildContext context, QuotesInvoicesViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             HEADER SECTION                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildHeaderSection(BuildContext context, QuotesInvoicesViewModel viewModel)
+  {
     return Card(
       elevation: 2,
       child: Padding(
@@ -76,6 +95,7 @@ class QuotesInvoicesView extends StatelessWidget {
           children: [
             Row(
               children: [
+                // TITLE
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,6 +120,7 @@ class QuotesInvoicesView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
+                // RANGE PICKER
                 DateRangePicker(
                   startDate: viewModel.startDate,
                   endDate: viewModel.endDate,
@@ -108,9 +129,11 @@ class QuotesInvoicesView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            // Tab Selection
+
+            // TAB SECTION
             Row(
               children: [
+                // QUOTES
                 _buildTabButton(
                   'Quotes',
                   Icons.description,
@@ -119,6 +142,8 @@ class QuotesInvoicesView extends StatelessWidget {
                       () => viewModel.setTabIndex(0),
                 ),
                 const SizedBox(width: 12),
+
+                // INVOICES
                 _buildTabButton(
                   'Invoices',
                   Icons.receipt,
@@ -126,14 +151,16 @@ class QuotesInvoicesView extends StatelessWidget {
                   viewModel.selectedTabIndex == 1,
                       () => viewModel.setTabIndex(1),
                 ),
-                const SizedBox(width: 12), // <--- ADD THIS
-                _buildTabButton( // <--- ADD THIS
-                  'Credits', // <--- ADD THIS
-                  Icons.assignment_return, // <--- ADD THIS
-                  2, // <--- ADD THIS
-                  viewModel.selectedTabIndex == 2, // <--- ADD THIS
-                      () => viewModel.setTabIndex(2), // <--- ADD THIS
-                ), // <--- ADD THIS
+                const SizedBox(width: 12),
+
+                // CREDITS
+                _buildTabButton(
+                  'Credits',
+                  Icons.assignment_return,
+                  2,
+                  viewModel.selectedTabIndex == 2,
+                      () => viewModel.setTabIndex(2),
+                ),
               ],
             ),
           ],
@@ -142,7 +169,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildTabButton(String title, IconData icon, int index, bool isSelected, VoidCallback onTap) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                TAB BUTTON                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildTabButton(String title, IconData icon, int index, bool isSelected, VoidCallback onTap)
+  {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -177,12 +208,20 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsSection(QuotesInvoicesViewModel viewModel) {
-    // Determine which stats to show based on selected tab
+  ////////////////////////////////////////////////////////////////////////////
+  //                             STATS SECTION                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildStatsSection(QuotesInvoicesViewModel viewModel)
+  {
     if (viewModel.selectedTabIndex == 0) {
       final stats = viewModel.quotesStats;
+      ////////////////////////////////////////////////////////////////////////////
+      //                                  QUOTES                                //
+      ////////////////////////////////////////////////////////////////////////////
       return Row(
         children: [
+
+          // TOTAL QUOTES
           Expanded(
             child: _buildStatCard(
               'Total Quotes',
@@ -192,6 +231,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+
+          // PENDING QUOTES
           Expanded(
             child: _buildStatCard(
               'Pending',
@@ -201,6 +242,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+
+          // CONVERTED QUOTES
           Expanded(
             child: _buildStatCard(
               'Converted',
@@ -210,6 +253,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+
+          // CONVERSION RATE
           Expanded(
             child: _buildStatCard(
               'Conversion Rate',
@@ -218,12 +263,18 @@ class QuotesInvoicesView extends StatelessWidget {
               Colors.blue,
             ),
           ),
+
         ],
       );
     } else if (viewModel.selectedTabIndex == 1) {
       final stats = viewModel.invoicesStats;
+
+      ////////////////////////////////////////////////////////////////////////////
+      //                                INVOICES                                //
+      ////////////////////////////////////////////////////////////////////////////
       return Row(
         children: [
+          // INVOICES
           Expanded(
             child: _buildStatCard(
               'Total Invoices',
@@ -233,6 +284,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+
+          // PAID INVOICES
           Expanded(
             child: _buildStatCard(
               'Paid',
@@ -242,6 +295,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+
+          // OVERDUE PAYMENTS
           Expanded(
             child: _buildStatCard(
               'Overdue',
@@ -251,6 +306,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+
+          // PAYMENT RATE
           Expanded(
             child: _buildStatCard(
               'Payment Rate',
@@ -262,9 +319,15 @@ class QuotesInvoicesView extends StatelessWidget {
         ],
       );
     } else { // selectedTabIndex == 2 for Credits
-      final stats = viewModel.creditStats; // Using the new creditStats
+      final stats = viewModel.creditStats;
+
+      ////////////////////////////////////////////////////////////////////////////
+      //                                  CREDITS                               //
+      ////////////////////////////////////////////////////////////////////////////
       return Row(
         children: [
+
+          // CREDITS
           Expanded(
             child: _buildStatCard(
               'Total Credits',
@@ -274,6 +337,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+
+          // CREDIT VALUE
           Expanded(
             child: _buildStatCard(
               'Total Credited Value',
@@ -282,7 +347,7 @@ class QuotesInvoicesView extends StatelessWidget {
               Colors.purple,
             ),
           ),
-          // You can add more credit-specific stats here if needed
+
           const Expanded(child: SizedBox.shrink()), // Fill remaining space
           const Expanded(child: SizedBox.shrink()), // Fill remaining space
         ],
@@ -290,7 +355,11 @@ class QuotesInvoicesView extends StatelessWidget {
     }
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                STATS CARD                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildStatCard(String title, String value, IconData icon, Color color)
+  {
     return Card(
       elevation: 2,
       child: Padding(
@@ -339,7 +408,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildListSection(QuotesInvoicesViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              LIST SECTION                              //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildListSection(QuotesInvoicesViewModel viewModel)
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -360,6 +433,7 @@ class QuotesInvoicesView extends StatelessWidget {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
+                // TITLE
                 Text(
                   viewModel.selectedTabIndex == 0
                       ? 'Quotes'
@@ -375,6 +449,8 @@ class QuotesInvoicesView extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
+
+          // LIST
           Expanded(
             child: Builder(
               builder: (context) {
@@ -393,7 +469,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildQuotesList(QuotesInvoicesViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              QUOTES LIST                               //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildQuotesList(QuotesInvoicesViewModel viewModel)
+  {
     if (viewModel.quotes.isEmpty) {
       return _buildEmptyState('No quotes found', Icons.description);
     }
@@ -408,7 +488,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildInvoicesList(QuotesInvoicesViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             INVOICE LIST                               //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildInvoicesList(QuotesInvoicesViewModel viewModel)
+  {
     if (viewModel.invoices.isEmpty) {
       return _buildEmptyState('No invoices found', Icons.receipt);
     }
@@ -423,8 +507,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  // <--- ADD THIS NEW WIDGET
-  Widget _buildCreditedInvoicesList(QuotesInvoicesViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             CREDITS LIST                               //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildCreditedInvoicesList(QuotesInvoicesViewModel viewModel)
+  {
     final creditedInvoices = viewModel.creditedInvoices;
     if (creditedInvoices.isEmpty) {
       return _buildEmptyState('No credited invoices found', Icons.assignment_return);
@@ -439,9 +526,12 @@ class QuotesInvoicesView extends StatelessWidget {
       },
     );
   }
-  // --->
 
-  Widget _buildQuoteListItem(Quote quote, QuotesInvoicesViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            QUOTE LIST ITEM                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildQuoteListItem(Quote quote, QuotesInvoicesViewModel viewModel)
+  {
     final isSelected = viewModel.selectedQuote?.id == quote.id;
 
     return Container(
@@ -516,8 +606,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  // Modify _buildInvoiceListItem to handle credited invoices visually
-  Widget _buildInvoiceListItem(Invoice invoice, QuotesInvoicesViewModel viewModel, {bool isCredit = false}) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                           INVOICE LIST ITEM                            //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildInvoiceListItem(Invoice invoice, QuotesInvoicesViewModel viewModel, {bool isCredit = false})
+  {
     final isSelected = viewModel.selectedInvoice?.id == invoice.id;
 
     Color statusColor = isCredit ? Colors.purple : _getInvoiceStatusColor(invoice.status); // <--- Conditional color
@@ -596,7 +689,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailSection(QuotesInvoicesViewModel viewModel) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            DETAILS SECTION                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildDetailSection(QuotesInvoicesViewModel viewModel)
+  {
     if (viewModel.selectedQuote != null) {
       return QuoteDetailView(quote: viewModel.selectedQuote!);
     } else if (viewModel.selectedInvoice != null) {
@@ -607,7 +704,11 @@ class QuotesInvoicesView extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _buildEmptyState(String message, IconData icon) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                                EMPTY STATE                             //
+  ////////////////////////////////////////////////////////////////////////////
+  Widget _buildEmptyState(String message, IconData icon)
+  {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -631,7 +732,11 @@ class QuotesInvoicesView extends StatelessWidget {
     );
   }
 
-  Color _getQuoteStatusColor(QuoteStatus status) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             QUOTE STATUS COLOR                         //
+  ////////////////////////////////////////////////////////////////////////////
+  Color _getQuoteStatusColor(QuoteStatus status)
+  {
     switch (status) {
       case QuoteStatus.pending:
         return Colors.orange;
@@ -644,7 +749,11 @@ class QuotesInvoicesView extends StatelessWidget {
     }
   }
 
-  String _getQuoteStatusText(QuoteStatus status) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                              QUOTE STATUS TEXT                         //
+  ////////////////////////////////////////////////////////////////////////////
+  String _getQuoteStatusText(QuoteStatus status)
+  {
     switch (status) {
       case QuoteStatus.pending:
         return 'Pending';
@@ -657,7 +766,11 @@ class QuotesInvoicesView extends StatelessWidget {
     }
   }
 
-  Color _getInvoiceStatusColor(InvoiceStatus status) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                            INVOICE STATUS COLOR                        //
+  ////////////////////////////////////////////////////////////////////////////
+  Color _getInvoiceStatusColor(InvoiceStatus status)
+  {
     switch (status) {
       case InvoiceStatus.draft:
         return Colors.grey;
@@ -672,7 +785,11 @@ class QuotesInvoicesView extends StatelessWidget {
     }
   }
 
-  String _getInvoiceStatusText(InvoiceStatus status) {
+  ////////////////////////////////////////////////////////////////////////////
+  //                             INVOICE STATUS TEXT                        //
+  ////////////////////////////////////////////////////////////////////////////
+  String _getInvoiceStatusText(InvoiceStatus status)
+  {
     switch (status) {
       case InvoiceStatus.draft:
         return 'Draft';

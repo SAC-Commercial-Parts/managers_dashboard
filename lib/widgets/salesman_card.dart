@@ -1,13 +1,12 @@
 // lib/widgets/salesman_card.dart
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
-import '../models/rep.dart'; // Salesmen are also Rep objects
+import '../models/rep.dart';
 
 class SalesmanCard extends StatelessWidget {
-  final Rep salesman; // Using Rep model for salesman
+  final Salesman salesman; // Using Rep model for salesman
   final bool isSelected;
   final VoidCallback onTap;
-
   const SalesmanCard({
     super.key,
     required this.salesman,
@@ -15,11 +14,15 @@ class SalesmanCard extends StatelessWidget {
     required this.onTap,
   });
 
+  ////////////////////////////////////////////////////////////////////////////
+  //                                UI OUTPUT                               //
+  ////////////////////////////////////////////////////////////////////////////
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      color: isSelected ? AppTheme.primaryRed.withAlpha(56) : Theme.of(context).cardColor,
+      color: Theme.of(context).cardColor,
       elevation: isSelected ? 4 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -28,6 +31,10 @@ class SalesmanCard extends StatelessWidget {
           width: 1.5,
         ),
       ),
+
+      ////////////////////////////////////////////////////////////////////////////
+      //                          SALESMAN DETAILS CARD                         //
+      ////////////////////////////////////////////////////////////////////////////
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
